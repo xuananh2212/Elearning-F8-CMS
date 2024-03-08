@@ -1,7 +1,7 @@
 import React from 'react'
-
-export default function Login() {
+import Login from '@/components/Login/Login'
+export default function PageLogin() {
      return (
-          <div>Login</div>
+          <Login />
      )
 }
