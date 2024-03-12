@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server'
 import { endPointApi } from './helper/endPointApi';
-const { apiToken } = endPointApi;
+const { API_TOKEN } = endPointApi;
 export async function middleware(request) {
-     let { value: token } = request.cookies.get('token');
-     console.log(token);
-     const res = await fetch(`${process.env.API}/${apiToken}`,
+     let object = request.cookies.get('token');
+     const res = await fetch(`${process.env.API}/${API_TOKEN}`,
           {
                method: 'POST',
                headers: {
-                    "Authorization": `Bearer${token}`
+                    "Authorization": `Bearer${object?.value}`
                }
           });
      const data = await res.json();
-     if (request.url !== `${process.env.LOCALHOST}/auth/dang-nhap`) {
+     const { pathname } = request.nextUrl;
+     if (pathname !== '/auth/dang-nhap') {
           if (data.status === 401) {
                return NextResponse.redirect(new URL('/auth/dang-nhap', request.url));
           }
@@ -23,5 +23,5 @@ export async function middleware(request) {
      }
 }
 export const config = {
-     matcher: ['/', '/auth/dang-nhap']
+     matcher: ['/', '/auth/dang-nhap', '/categories:path*', '/courses:path*']
 }

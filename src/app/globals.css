@@ -91,7 +91,6 @@ video {
      vertical-align: baseline;
 }
 
-/* HTML5 display-role reset for older browsers */
 article,
 aside,
 details,
@@ -131,4 +130,13 @@ q:after {
 table {
      border-collapse: collapse;
      border-spacing: 0;
+}
+
+input {
+     border: none;
+     outline: none;
+}
+
+* {
+     box-sizing: border-box;
 }

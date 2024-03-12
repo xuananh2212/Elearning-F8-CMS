@@ -5,7 +5,7 @@ import { Button, Checkbox, Form, Input, notification } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { requestLogin } from '@/store/middlewares/auth.middewares';
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 export default function Login() {
      const dispatch = useDispatch();
      const router = useRouter();
@@ -42,7 +42,6 @@ export default function Login() {
      const onFinishFailed = (errorInfo) => {
           console.log('Failed:', errorInfo);
      };
-     console.log(user);
      useEffect(() => {
           if (user) {
                var date = new Date();
@@ -109,7 +108,7 @@ export default function Login() {
                                              message: 'Please input your password!'
                                         }]}
                               >
-                                   <Input.Password className='w-full p-2' placeholder="vui lòng nhập Password" />
+                                   <Input.Password className='w-full p-2' placeholder="vui lòng nhập Password" autoComplete="on" />
                               </Form.Item>
                               {formError?.password && <span className='mt-1 text-[#ff0000]'>{formError?.password}</span>}
 
@@ -124,7 +123,7 @@ export default function Login() {
 
                               <Form.Item >
                                    <Button loading={loading} type="primary" htmlType="submit"
-                                        className=' text-[#fff] bg-[#1dbfaf]  py-2 px-4 h-full flex justify-center rounded-[44px] w-full cursor-pointer'
+                                        className=' text-[#fff] bg-[#f05123]  py-2 px-4 h-full flex justify-center rounded-[44px] w-full cursor-pointer'
                                    >
                                         Submit
                                    </Button>
