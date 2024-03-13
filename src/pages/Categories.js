@@ -3,7 +3,7 @@ import { IoMdAdd } from "react-icons/io";
 import { Button, Modal, Form, Input, Select, Table, Tag, Space, Popconfirm, Tooltip, notification } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from "react-redux";
-import { requestGetCategories, requestAddCategory, requestDeleteCategory } from "@/store/middlewares/category.middewares";
+import { requestGetCategories, requestAddCategory, requestDeleteCategory, requestUpdateCategory } from "@/store/middlewares/category.middewares";
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -17,33 +17,55 @@ export default function Categories() {
      const [loadingSubmit, setLoadingSubmit] = useState(false);
      const [validateName, setValidateName] = useState(null);
      const [isModalOpen, setIsModalOpen] = useState(false);
-     const [form, setForm] = useState(
-          {
-               name: null,
+     const [isEdit, setIsEdit] = useState(false);
+     const [form, setForm] = useState({
+          name: '',
+          status: 0
+     });
+     const handleCancel = () => {
+          formCreate.resetFields();
+          setForm({
+               name: '',
                status: 0
           });
+          setIsModalOpen(false);
+     };
+     const handleChangeStatus = (value) => {
+          setForm({ ...form, status: value });
+     }
+     const handleChangeName = (value) => {
+          setForm({ ...form, name: value });
+     }
 
-     const showModal = () => {
+     const showCreateModal = () => {
+          setIsEdit(false);
           setIsModalOpen(true);
      };
+     const showEditModal = (category) => {
+          setIsEdit(true);
+          setForm(category);
+          formCreate.setFieldsValue(category);
+          setIsModalOpen(true);
+     }
      useEffect(() => {
           if (isModalOpen) {
                setValidateName(null);
           }
 
      }, [isModalOpen]);
-     console.log(formCreate);
-     const handleOk = async () => {
+     const handleAddCategory = async () => {
           setLoadingSubmit(true);
           try {
                const response = await dispatch(requestAddCategory(form));
                const data = unwrapResult(response);
                if (data.status === 201) {
                     formCreate.resetFields();
-                    setForm({
-                         name: null,
-                         status: 0
-                    })
+                    setForm(
+                         {
+                              name: '',
+                              status: 0
+                         }
+                    );
                     notification.success({
                          message: "Thêm danh mục thành công",
                          duration: 1.0
@@ -63,33 +85,39 @@ export default function Categories() {
           setLoadingSubmit(false);
 
      };
-
-     const handleCancel = () => {
-          formCreate.resetFields();
-          setIsModalOpen(false);
-     };
-     const handleChangeStatus = (value) => {
-          setForm({ ...form, status: value });
-     }
-     const handleChangeName = (value) => {
-          setForm({ ...form, name: value });
-     }
-     const requestLoadCategories = async () => {
+     const handleEditCategory = async () => {
+          setLoadingSubmit(true);
+          console.log(form);
           try {
-               const response = await dispatch(requestGetCategories());
+               const response = await dispatch(requestUpdateCategory(form));
                const data = unwrapResult(response);
-               if (data.status !== 200) {
-                    throw new Error(data?.message)
-               };
+               if (data.status === 200) {
+                    formCreate.resetFields();
+                    setForm({
+                         name: '',
+                         status: 0
+                    });
+                    notification.success({
+                         message: data.message,
+                         duration: 1.0
+                    })
+                    setIsModalOpen(false);
+                    setValidateName("");
+               } else {
+                    setValidateName(data.message);
+               }
+
           } catch (e) {
+               console.log(e);
                notification.error({
-                    message: e.message || 'lỗi server',
-                    duration: 1.0,
+                    message: 'lỗi server',
+                    duration: 1.0
                })
           }
+          setLoadingSubmit(false);
 
-     }
-     const handleDeleteCategory = async (id, text) => {
+     };
+     const handleDeleteCategory = async (id) => {
           try {
                const response = await dispatch(requestDeleteCategory(id));
                const result = unwrapResult(response);
@@ -109,6 +137,22 @@ export default function Categories() {
 
           }
      };
+     const requestLoadCategories = async () => {
+          try {
+               const response = await dispatch(requestGetCategories());
+               const data = unwrapResult(response);
+               if (data.status !== 200) {
+                    throw new Error(data?.message)
+               };
+          } catch (e) {
+               notification.error({
+                    message: e.message || 'lỗi server',
+                    duration: 1.0,
+               })
+          }
+
+     }
+
      useEffect(() => {
           requestLoadCategories();
      }, []);
@@ -125,7 +169,7 @@ export default function Categories() {
                key: 'name',
           },
           {
-               title: 'Trạng Thái',
+               title: 'Trạng thái',
                key: 'status',
                dataIndex: 'status',
                render: (_, { status, id }) => (
@@ -143,13 +187,13 @@ export default function Categories() {
                )
           },
           {
-               title: 'Hành Động',
+               title: 'Hành động',
                key: 'action',
-               render: (_, { id }) => (
+               render: (category, { id }) => (
                     <Space size="middle">
                          <Tooltip placement="top" title="Chỉnh Sửa">
                               <Button
-                                   onClick={showModal}
+                                   onClick={() => showEditModal(category)}
                               >
                                    <MdEdit className="text-[20px]" />
                               </Button>
@@ -178,12 +222,11 @@ export default function Categories() {
                <Button
                     className="mt-5 w-[50px] h-[50px] flex items-center justify-center bg-[#1473e6] rounded-[50%]"
                     type="primary"
-                    onClick={showModal}
+                    onClick={showCreateModal}
                >
                     <IoMdAdd className="text-[#fff] text-[20px]" />
                </Button>
-               <h2 className="mt-7 text-[#242424] text-[20px] font-bold text-center">Danh Sách Danh Mục</h2>
-
+               <h2 className="mt-7 text-[#242424] text-[20px] font-bold text-center">Danh sách danh mục</h2>
                <Table
                     className="mt-5"
                     loading={loading}
@@ -195,9 +238,9 @@ export default function Categories() {
                     }}
                />
                <Modal
-                    title="Tạo Danh Mục"
+                    title={isEdit ? "Sửa danh mục" : "Tạo danh mục"}
                     open={isModalOpen}
-                    onOk={handleOk}
+                    onOk={isEdit ? handleEditCategory : handleAddCategory}
                     onCancel={handleCancel}
                     footer={[
                          <Button key="back"
@@ -210,9 +253,9 @@ export default function Categories() {
                               className="bg-[#1473e6]"
                               key="submit"
                               loading={loading}
-                              onClick={handleOk}
+                              onClick={isEdit ? handleEditCategory : handleAddCategory}
                          >
-                              Tạo
+                              {isEdit ? "Cập nhập" : "Tạo"}
                          </Button>
                     ]}
                >
@@ -226,13 +269,18 @@ export default function Categories() {
                          }}
                     >
                          <Form.Item
+                              className="mb-1"
                               name="name"
                               label="Tên danh mục"
                          >
                               <Input onChange={(e) => handleChangeName(e.target.value)} />
+
                          </Form.Item>
                          {
-                              validateName && <span className="text-[red] mt-2">{validateName}</span>
+                              validateName && (
+                                   <Form.Item className="mb-0">
+                                        <span className="text-[red]">{validateName}</span>
+                                   </Form.Item>)
                          }
                          <Form.Item
                               name="status"

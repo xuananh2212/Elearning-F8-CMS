@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { requestGetCategories, requestAddCategory, requestDeleteCategory } from "../middlewares/category.middewares";
+import { requestGetCategories, requestAddCategory, requestDeleteCategory, requestUpdateCategory } from "../middlewares/category.middewares";
 const initialState = {
      loading: false,
      categories: []
@@ -12,7 +12,7 @@ const categorySlices = createSlice({
 
      },
      extraReducers: (builder) => {
-          const listResquests = [requestGetCategories, requestAddCategory, requestDeleteCategory];
+          const listResquests = [requestGetCategories, requestAddCategory, requestDeleteCategory, requestUpdateCategory];
           listResquests.forEach((resquest) => {
                builder.addCase(resquest.pending, (state) => {
                     state.loading = true;
@@ -34,6 +34,12 @@ const categorySlices = createSlice({
           builder.addCase(requestDeleteCategory.fulfilled, (state, action) => {
                if (action.payload.status === 200) {
                     state.categories = state.categories.filter((category) => category.id !== action.payload.id);
+               }
+               state.loading = false;
+          });
+          builder.addCase(requestUpdateCategory.fulfilled, (state, action) => {
+               if (action.payload.status === 200) {
+                    state.categories = state.categories.map(category => category.id === action.payload.category?.id ? action.payload.category : category);
                }
                state.loading = false;
           });

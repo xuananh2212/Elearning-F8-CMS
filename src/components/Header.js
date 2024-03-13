@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import Search from "@/components/Search/Search";
-import Action from "@/components/Action/Action"
+import Search from "@/components/Search";
+import Action from "@/components/Action"
 export default function Header() {
      return (
           <div className='h-[66px] flex justify-between bg-[#fff] items-center px-7 border-b-[1px] border-solid border-[#e8ebed] sticky top-0 right-0 z-20'>

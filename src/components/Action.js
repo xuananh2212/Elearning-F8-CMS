@@ -1,5 +1,5 @@
-import Notification from "@/components/Notification/Notification";
-import DropDow from "../DropDow/DropDow";
+import Notification from "@/components/Notification";
+import DropDow from "./DropDow";
 export default function Action() {
 
      return (
