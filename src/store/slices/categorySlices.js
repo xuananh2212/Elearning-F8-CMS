@@ -1,5 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { requestGetCategories, requestAddCategory, requestDeleteCategory, requestUpdateCategory } from "../middlewares/category.middewares";
+import {
+     requestGetCategories, requestAddCategory,
+     requestDeleteCategory, requestUpdateCategory,
+     requestDeleteCategories
+} from "../middlewares/category.middewares";
 const initialState = {
      loading: false,
      categories: []
@@ -12,8 +16,12 @@ const categorySlices = createSlice({
 
      },
      extraReducers: (builder) => {
-          const listResquests = [requestGetCategories, requestAddCategory, requestDeleteCategory, requestUpdateCategory];
-          listResquests.forEach((resquest) => {
+          const listRequests = [
+               requestGetCategories, requestAddCategory,
+               requestDeleteCategory, requestUpdateCategory,
+               requestDeleteCategories
+          ];
+          listRequests.forEach((resquest) => {
                builder.addCase(resquest.pending, (state) => {
                     state.loading = true;
                });
@@ -22,7 +30,9 @@ const categorySlices = createSlice({
                });
           });
           builder.addCase(requestGetCategories.fulfilled, (state, action) => {
-               state.categories = action.payload.categories;
+               if (action.payload.status === 200) {
+                    state.categories = action.payload.categories;
+               }
                state.loading = false;
           });
           builder.addCase(requestAddCategory.fulfilled, (state, action) => {
@@ -40,6 +50,12 @@ const categorySlices = createSlice({
           builder.addCase(requestUpdateCategory.fulfilled, (state, action) => {
                if (action.payload.status === 200) {
                     state.categories = state.categories.map(category => category.id === action.payload.category?.id ? action.payload.category : category);
+               }
+               state.loading = false;
+          });
+          builder.addCase(requestDeleteCategories.fulfilled, (state, action) => {
+               if (action.payload.status === 200) {
+                    state.categories = state.categories.filter(category => !action.payload.categoriesId.includes(category?.id));
                }
                state.loading = false;
           });

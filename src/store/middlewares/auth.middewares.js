@@ -1,8 +1,20 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { endPointApi } from "@/helper/endPointApi";
-const { LOGIN, API_TOKEN, LOGOUT } = endPointApi;
+const { LOGIN, API_TOKEN, LOGOUT, RESGITER } = endPointApi;
 export const requestLogin = createAsyncThunk('auth/login', async (props) => {
      const res = await fetch(`${process.env.NEXT_PUBLIC_API}/${LOGIN}`, {
+          method: 'POST',
+          headers: {
+               'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(props)
+
+     });
+     const data = await res.json();
+     return data;
+});
+export const requestResgiter = createAsyncThunk('auth/resgiter', async (props) => {
+     const res = await fetch(`${process.env.NEXT_PUBLIC_API}/${RESGITER}`, {
           method: 'POST',
           headers: {
                'Content-Type': 'application/json'

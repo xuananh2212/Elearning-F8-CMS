@@ -53,7 +53,7 @@ export default function DropDow() {
                className="relative flex p-[3px] items-center justify-center cursor-pointer rounded-[50%] bg-gradient-to-r from-[#ffd900] to-[#b45264]"
                onClick={() => setIsShow(!isShow)}
           >
-               <button className="bg-[transparent]">
+               <button>
                     <Image
                          className='rounded-[50%]'
                          src={`${user?.avatar || 'http://res.cloudinary.com/daxftrleb/image/upload/v1709733165/e-learning/xpasxyscc4jh0tz7rlzu.png'}`}

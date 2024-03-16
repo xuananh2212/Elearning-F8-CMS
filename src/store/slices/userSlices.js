@@ -1,7 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { requestLogin, requestToken, requestLogOut } from "@/store/middlewares/auth.middewares";
+import {
+     requestLogin, requestToken,
+     requestLogOut, requestResgiter
+} from "@/store/middlewares/auth.middewares";
+import {
+     requestGetUsers, requestEditUser,
+     requestDeleteUser, requestDeleteManyUser
+} from "../middlewares/user.middwares";
 const initialState = {
      userInfo: null,
+     users: [],
      loading: false,
      accessToken: null,
      refreshToken: null
@@ -12,7 +20,13 @@ const userSlices = createSlice({
      reducers: {
      },
      extraReducers: (builder) => {
-          const listResquests = [requestLogin, requestToken, requestLogOut];
+          const listResquests =
+               [
+                    requestLogin, requestToken,
+                    requestLogOut, requestGetUsers,
+                    requestEditUser, requestDeleteUser,
+                    requestDeleteManyUser, requestResgiter
+               ];
           listResquests.forEach((resquest) => {
                builder.addCase(resquest.pending, (state) => {
                     state.loading = true;
@@ -37,7 +51,36 @@ const userSlices = createSlice({
                state.refreshToken = null;
                state.loading = false;
           });
-
+          builder.addCase(requestGetUsers.fulfilled, (state, action) => {
+               if (action.payload.status === 200) {
+                    state.users = action.payload.users;
+               }
+               state.loading = false;
+          });
+          builder.addCase(requestEditUser.fulfilled, (state, action) => {
+               if (action.payload.status === 200) {
+                    state.users = state.users.map((user) => user.id === action?.payload?.user?.id ? action.payload.user : user);
+               }
+               state.loading = false;
+          });
+          builder.addCase(requestDeleteUser.fulfilled, (state, action) => {
+               if (action.payload.status === 200) {
+                    state.users = state.users.filter(({ id }) => id !== action.payload.userId);
+               }
+               state.loading = false;
+          });
+          builder.addCase(requestDeleteManyUser.fulfilled, (state, action) => {
+               if (action.payload.status === 200) {
+                    state.users = state.users.filter(({ id }) => !action.payload?.userIds.includes(id));
+               }
+               state.loading = false;
+          });
+          builder.addCase(requestResgiter.fulfilled, (state, action) => {
+               if (action.payload.status === 201) {
+                    state.users = [...state.users, action.payload.user];
+               }
+               state.loading = false;
+          });
      }
 });
 

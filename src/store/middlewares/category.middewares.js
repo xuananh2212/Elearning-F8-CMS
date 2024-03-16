@@ -32,9 +32,19 @@ export const requestDeleteCategory = createAsyncThunk('categories/delete', async
      const data = await res.json();
      return data;
 });
+export const requestDeleteCategories = createAsyncThunk('categories/delete-many', async (props) => {
+     const res = await fetch(`${process.env.NEXT_PUBLIC_API}/${CATEGORIES}/delete-categories`, {
+          method: 'POST',
+          headers: {
+               'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(props)
+     });
+     const data = await res.json();
+     return data;
+});
 export const requestUpdateCategory = createAsyncThunk('categories/update', async (props) => {
      const { id } = props;
-     console.log(props);
      const res = await fetch(`${process.env.NEXT_PUBLIC_API}/${CATEGORIES}/${id}`, {
           method: 'POST',
           headers: {

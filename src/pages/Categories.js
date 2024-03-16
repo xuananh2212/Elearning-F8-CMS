@@ -3,38 +3,44 @@ import { IoMdAdd } from "react-icons/io";
 import { Button, Modal, Form, Input, Select, Table, Tag, Space, Popconfirm, Tooltip, notification } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from "react-redux";
-import { requestGetCategories, requestAddCategory, requestDeleteCategory, requestUpdateCategory } from "@/store/middlewares/category.middewares";
+import {
+     requestGetCategories, requestAddCategory,
+     requestDeleteCategory, requestUpdateCategory,
+     requestDeleteCategories
+} from "@/store/middlewares/category.middewares";
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
 import { unwrapResult } from "@reduxjs/toolkit";
 import moment from "moment";
 import { useForm } from "antd/es/form/Form";
+import { RiDeleteBin2Fill } from "react-icons/ri";
 export default function Categories() {
+     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
      const dispatch = useDispatch();
-     const [formCreate] = useForm();
+     const [form] = useForm();
      const loading = useSelector((state) => state.category.loading);
      const categories = useSelector((state) => state.category.categories);
      const [loadingSubmit, setLoadingSubmit] = useState(false);
      const [validateName, setValidateName] = useState(null);
      const [isModalOpen, setIsModalOpen] = useState(false);
      const [isEdit, setIsEdit] = useState(false);
-     const [form, setForm] = useState({
+     const [formValue, setFormValue] = useState({
           name: '',
           status: 0
      });
      const handleCancel = () => {
-          formCreate.resetFields();
-          setForm({
+          form.resetFields();
+          setFormValue({
                name: '',
                status: 0
           });
           setIsModalOpen(false);
      };
      const handleChangeStatus = (value) => {
-          setForm({ ...form, status: value });
+          setFormValue({ ...formValue, status: value });
      }
      const handleChangeName = (value) => {
-          setForm({ ...form, name: value });
+          setFormValue({ ...formValue, name: value });
      }
 
      const showCreateModal = () => {
@@ -43,24 +49,62 @@ export default function Categories() {
      };
      const showEditModal = (category) => {
           setIsEdit(true);
-          setForm(category);
-          formCreate.setFieldsValue(category);
+          setFormValue(category);
+          form.setFieldsValue(category);
           setIsModalOpen(true);
      }
-     useEffect(() => {
-          if (isModalOpen) {
-               setValidateName(null);
-          }
-
-     }, [isModalOpen]);
+     const onSelectChange = (newSelectedRowKeys) => {
+          setSelectedRowKeys(newSelectedRowKeys);
+     };
+     const rowSelection = {
+          selectedRowKeys,
+          onChange: onSelectChange,
+          selections: [
+               {
+                    key: 'all',
+                    text: 'Chọn tất cả',
+                    onSelect: (changeableRowKeys) => {
+                         setSelectedRowKeys(changeableRowKeys);
+                    },
+               },
+               {
+                    key: 'odd',
+                    text: 'Chọn hàng lẻ',
+                    onSelect: (changeableRowKeys) => {
+                         let newSelectedRowKeys = [];
+                         newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+                              if (index % 2 !== 0) {
+                                   return false;
+                              }
+                              return true;
+                         });
+                         setSelectedRowKeys(newSelectedRowKeys);
+                    },
+               },
+               {
+                    key: 'even',
+                    text: 'Chọn hàng chẵn',
+                    onSelect: (changeableRowKeys) => {
+                         let newSelectedRowKeys = [];
+                         newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+                              if (index % 2 !== 0) {
+                                   return true;
+                              }
+                              return false;
+                         });
+                         setSelectedRowKeys(newSelectedRowKeys);
+                    },
+               },
+          ],
+     };
      const handleAddCategory = async () => {
           setLoadingSubmit(true);
           try {
-               const response = await dispatch(requestAddCategory(form));
+               const response = await dispatch(requestAddCategory(formValue));
                const data = unwrapResult(response);
                if (data.status === 201) {
-                    formCreate.resetFields();
-                    setForm(
+                    form.resetFields();
+                    setFormValue(
                          {
                               name: '',
                               status: 0
@@ -87,13 +131,12 @@ export default function Categories() {
      };
      const handleEditCategory = async () => {
           setLoadingSubmit(true);
-          console.log(form);
           try {
-               const response = await dispatch(requestUpdateCategory(form));
+               const response = await dispatch(requestUpdateCategory(formValue));
                const data = unwrapResult(response);
                if (data.status === 200) {
-                    formCreate.resetFields();
-                    setForm({
+                    form.resetFields();
+                    setFormValue({
                          name: '',
                          status: 0
                     });
@@ -108,7 +151,6 @@ export default function Categories() {
                }
 
           } catch (e) {
-               console.log(e);
                notification.error({
                     message: 'lỗi server',
                     duration: 1.0
@@ -137,6 +179,27 @@ export default function Categories() {
 
           }
      };
+     const handleDeleteCategories = async () => {
+          try {
+               const response = await dispatch(requestDeleteCategories({ categoriesId: selectedRowKeys }));
+               const data = unwrapResult(response);
+               if (data.status !== 200) {
+                    throw new Error(data.message);
+               }
+               setSelectedRowKeys([]);
+               notification.success({
+                    message: data.message,
+                    duration: 1.0
+               })
+          } catch (e) {
+               notification.error({
+                    message: e?.message || 'lỗi server',
+                    duration: 1.0
+               })
+
+          }
+
+     }
      const requestLoadCategories = async () => {
           try {
                const response = await dispatch(requestGetCategories());
@@ -156,6 +219,13 @@ export default function Categories() {
      useEffect(() => {
           requestLoadCategories();
      }, []);
+
+     useEffect(() => {
+          if (isModalOpen) {
+               setValidateName(null);
+          }
+
+     }, [isModalOpen]);
      const columns = [
           {
                title: 'STT',
@@ -227,16 +297,39 @@ export default function Categories() {
                     <IoMdAdd className="text-[#fff] text-[20px]" />
                </Button>
                <h2 className="mt-7 text-[#242424] text-[20px] font-bold text-center">Danh sách danh mục</h2>
-               <Table
-                    className="mt-5"
-                    loading={loading}
-                    columns={columns}
-                    dataSource={categories}
-                    pagination={{
-                         pageSize:
-                              5
-                    }}
-               />
+               <div className="relative">
+                    <Table
+                         className="mt-5"
+                         rowSelection={rowSelection}
+                         loading={loading}
+                         columns={columns}
+                         dataSource={categories.map((category, index) => {
+                              return { ...category, key: category.id }
+                         })}
+                         pagination={{
+                              pageSize:
+                                   5
+                         }}
+                    />
+                    {
+                         selectedRowKeys.length > 0 &&
+                         <Popconfirm
+                              className="absolute top-[-40px] left-0"
+                              title="Bạn có chắc bạn muốn xoá các danh mục này không?"
+                              placement="leftTop"
+                              onConfirm={handleDeleteCategories}
+                              okText="Yes"
+                              cancelText="No"
+
+                         >
+                              <Tooltip placement="top" title="Xóa">
+                                   <Button type="primary" danger>
+                                        <RiDeleteBin2Fill className="text-[20px]" />
+                                   </Button>
+                              </Tooltip>
+                         </Popconfirm>
+                    }
+               </div>
                <Modal
                     title={isEdit ? "Sửa danh mục" : "Tạo danh mục"}
                     open={isModalOpen}
@@ -262,8 +355,8 @@ export default function Categories() {
                     <Form
                          className="mt-2 p-5 rounded-lg border-solid border-[1px] border-[#b2b2b2]"
                          layout="vertical"
-                         name="create categories"
-                         form={formCreate}
+                         name="create-update-category"
+                         form={form}
                          initialValues={{
                               status: 0
                          }}
