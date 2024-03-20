@@ -32,8 +32,8 @@ export const requestDeleteCategory = createAsyncThunk('categories/delete', async
      const data = await res.json();
      return data;
 });
-export const requestDeleteCategories = createAsyncThunk('categories/delete-many', async (props) => {
-     const res = await fetch(`${process.env.NEXT_PUBLIC_API}/${CATEGORIES}/delete-categories`, {
+export const requestDeleteManyCategory = createAsyncThunk('categories/delete-many', async (props) => {
+     const res = await fetch(`${process.env.NEXT_PUBLIC_API}/${CATEGORIES}/delete-many-category`, {
           method: 'POST',
           headers: {
                'Content-Type': 'application/json'
@@ -51,6 +51,16 @@ export const requestUpdateCategory = createAsyncThunk('categories/update', async
                'Content-Type': 'application/json'
           },
           body: JSON.stringify(props)
+     });
+     const data = await res.json();
+     return data;
+});
+export const requestCategoriesTreeData = createAsyncThunk('categories/get-parent-categories', async () => {
+     const res = await fetch(`${process.env.NEXT_PUBLIC_API}/${CATEGORIES}/parent-categories`, {
+          method: 'GET',
+          headers: {
+               'Content-Type': 'application/json'
+          }
      });
      const data = await res.json();
      return data;

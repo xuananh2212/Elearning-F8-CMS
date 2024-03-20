@@ -2,11 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
      requestGetCategories, requestAddCategory,
      requestDeleteCategory, requestUpdateCategory,
-     requestDeleteCategories
+     requestDeleteManyCategory, requestCategoriesTreeData
 } from "../middlewares/category.middewares";
 const initialState = {
      loading: false,
-     categories: []
+     categories: [],
+     categoriesTreeData: []
 }
 
 const categorySlices = createSlice({
@@ -19,7 +20,7 @@ const categorySlices = createSlice({
           const listRequests = [
                requestGetCategories, requestAddCategory,
                requestDeleteCategory, requestUpdateCategory,
-               requestDeleteCategories
+               requestDeleteManyCategory, requestCategoriesTreeData
           ];
           listRequests.forEach((resquest) => {
                builder.addCase(resquest.pending, (state) => {
@@ -44,6 +45,15 @@ const categorySlices = createSlice({
           builder.addCase(requestDeleteCategory.fulfilled, (state, action) => {
                if (action.payload.status === 200) {
                     state.categories = state.categories.filter((category) => category.id !== action.payload.id);
+                    if (action.payload.childs && action.payload.childs.length) {
+                         state.categories = state.categories.map(category => {
+                              const categoryFind = action.payload.childs.find(({ id }) => id === category.id);
+                              if (categoryFind) {
+                                   return categoryFind
+                              }
+                              return category
+                         })
+                    }
                }
                state.loading = false;
           });
@@ -53,9 +63,24 @@ const categorySlices = createSlice({
                }
                state.loading = false;
           });
-          builder.addCase(requestDeleteCategories.fulfilled, (state, action) => {
+          builder.addCase(requestDeleteManyCategory.fulfilled, (state, action) => {
                if (action.payload.status === 200) {
-                    state.categories = state.categories.filter(category => !action.payload.categoriesId.includes(category?.id));
+                    state.categories = state.categories.filter(category => !action.payload.categoryIds.includes(category?.id));
+                    if (action.payload.childs && action.payload.childs.length) {
+                         state.categories = state.categories.map(category => {
+                              const categoryFind = action.payload.childs.find(({ id }) => id === category.id);
+                              if (categoryFind) {
+                                   return categoryFind
+                              }
+                              return category
+                         })
+                    }
+               }
+               state.loading = false;
+          });
+          builder.addCase(requestCategoriesTreeData.fulfilled, (state, action) => {
+               if (action.payload.status === 200) {
+                    state.categoriesTreeData = action.payload.categories;
                }
                state.loading = false;
           });

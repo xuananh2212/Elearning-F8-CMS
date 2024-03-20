@@ -34,7 +34,8 @@ export default function Users() {
      const [confirmLoading, setConfirmLoading] = useState(false);
      const [form] = useForm();
      const showCreateModal = () => {
-          console.log(1);
+          setFormValue(null);
+          form.resetFields(null);
           setIsModalOpen(true);
      };
      const handleCancel = () => {
@@ -53,6 +54,7 @@ export default function Users() {
           form.setFieldsValue(user);
           setIsModalOpen(true);
      }
+     console.log(form, formValue);
      const rowSelection = {
           selectedRowKeys,
           onChange: onSelectChange,

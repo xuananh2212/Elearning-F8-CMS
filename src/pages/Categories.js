@@ -1,12 +1,12 @@
 "use client"
 import { IoMdAdd } from "react-icons/io";
-import { Button, Modal, Form, Input, Select, Table, Tag, Space, Popconfirm, Tooltip, notification } from 'antd';
+import { Button, Modal, Form, Input, Select, Table, Tag, Space, Popconfirm, Tooltip, notification, TreeSelect } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from "react-redux";
 import {
      requestGetCategories, requestAddCategory,
      requestDeleteCategory, requestUpdateCategory,
-     requestDeleteCategories
+     requestDeleteManyCategory, requestCategoriesTreeData
 } from "@/store/middlewares/category.middewares";
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
@@ -14,26 +14,34 @@ import { unwrapResult } from "@reduxjs/toolkit";
 import moment from "moment";
 import { useForm } from "antd/es/form/Form";
 import { RiDeleteBin2Fill } from "react-icons/ri";
+import { getParentCategories } from "@/helper/parentCategories";
 export default function Categories() {
      const [selectedRowKeys, setSelectedRowKeys] = useState([]);
      const dispatch = useDispatch();
      const [form] = useForm();
      const loading = useSelector((state) => state.category.loading);
      const categories = useSelector((state) => state.category.categories);
+     const categoriesTreeData = useSelector((state) => state.category.categoriesTreeData);
      const [loadingSubmit, setLoadingSubmit] = useState(false);
-     const [validateName, setValidateName] = useState(null);
+     const [validateForm, setValidateForm] = useState(null);
      const [isModalOpen, setIsModalOpen] = useState(false);
      const [isEdit, setIsEdit] = useState(false);
      const [formValue, setFormValue] = useState({
           name: '',
-          status: 0
+          status: 0,
+          parentId: null,
      });
+     const handleOnChangeParentId = (value) => {
+          setFormValue({ ...formValue, parentId: value });
+     }
      const handleCancel = () => {
           form.resetFields();
           setFormValue({
                name: '',
-               status: 0
+               status: 0,
+               parentId: null
           });
+          setSelectedRowKeys([]);
           setIsModalOpen(false);
      };
      const handleChangeStatus = (value) => {
@@ -101,13 +109,14 @@ export default function Categories() {
           setLoadingSubmit(true);
           try {
                const response = await dispatch(requestAddCategory(formValue));
-               const data = unwrapResult(response);
-               if (data.status === 201) {
+               const { status, errors } = unwrapResult(response);
+               if (status === 201) {
                     form.resetFields();
                     setFormValue(
                          {
                               name: '',
-                              status: 0
+                              status: 0,
+                              parentId: null,
                          }
                     );
                     notification.success({
@@ -115,9 +124,9 @@ export default function Categories() {
                          duration: 1.0
                     })
                     setIsModalOpen(false);
-                    setValidateName("");
+                    setValidateForm(null);
                } else {
-                    setValidateName(data.message);
+                    setValidateForm(errors);
                }
 
           } catch (e) {
@@ -133,29 +142,42 @@ export default function Categories() {
           setLoadingSubmit(true);
           try {
                const response = await dispatch(requestUpdateCategory(formValue));
-               const data = unwrapResult(response);
-               if (data.status === 200) {
-                    form.resetFields();
-                    setFormValue({
-                         name: '',
-                         status: 0
-                    });
-                    notification.success({
-                         message: data.message,
-                         duration: 1.0
-                    })
-                    setIsModalOpen(false);
-                    setValidateName("");
-               } else {
-                    setValidateName(data.message);
+               const { status, message, errors } = unwrapResult(response);
+               switch (status) {
+                    case 200:
+                         form.resetFields();
+                         setFormValue({
+                              name: '',
+                              status: 0,
+                              parentId: null,
+                         });
+                         notification.success({
+                              message,
+                              duration: 1.0
+                         })
+                         setIsModalOpen(false);
+                         setValidateForm(null);
+                         break;
+                    case 404:
+                         notification.error({
+                              message,
+                              duration: 1.0
+                         })
+                         break;
+                    case 400:
+                         setValidateForm(errors);
+                         break;
+                    default:
+                         throw new Error(message);
                }
 
           } catch (e) {
                notification.error({
-                    message: 'lỗi server',
+                    message: e?.message || 'lỗi server',
                     duration: 1.0
                })
           }
+          setSelectedRowKeys([]);
           setLoadingSubmit(false);
 
      };
@@ -178,10 +200,11 @@ export default function Categories() {
                })
 
           }
+          setSelectedRowKeys([]);
      };
-     const handleDeleteCategories = async () => {
+     const handleDeleteManyCategory = async () => {
           try {
-               const response = await dispatch(requestDeleteCategories({ categoriesId: selectedRowKeys }));
+               const response = await dispatch(requestDeleteManyCategory({ categoryIds: selectedRowKeys }));
                const data = unwrapResult(response);
                if (data.status !== 200) {
                     throw new Error(data.message);
@@ -192,6 +215,7 @@ export default function Categories() {
                     duration: 1.0
                })
           } catch (e) {
+               console.log(e);
                notification.error({
                     message: e?.message || 'lỗi server',
                     duration: 1.0
@@ -209,12 +233,30 @@ export default function Categories() {
                };
           } catch (e) {
                notification.error({
-                    message: e.message || 'lỗi server',
+                    message: e?.message || 'lỗi server',
                     duration: 1.0,
                })
           }
 
      }
+     const requestLoadCategoriesTreeData = async () => {
+          try {
+               const response = await dispatch(requestCategoriesTreeData());
+               const data = unwrapResult(response);
+               if (data.status !== 200) {
+                    throw new Error(data?.message)
+               };
+          } catch (e) {
+               console.log(e);
+               notification.error({
+                    message: e?.message || 'lỗi server',
+                    duration: 1.0,
+               })
+          }
+     }
+     useEffect(() => {
+          requestLoadCategoriesTreeData();
+     }, [categories]);
 
      useEffect(() => {
           requestLoadCategories();
@@ -222,7 +264,7 @@ export default function Categories() {
 
      useEffect(() => {
           if (isModalOpen) {
-               setValidateName(null);
+               setValidateForm(null);
           }
 
      }, [isModalOpen]);
@@ -243,10 +285,27 @@ export default function Categories() {
                key: 'status',
                dataIndex: 'status',
                render: (_, { status, id }) => (
-                    <Tag color={status ? 'red' : 'blue'} key={id}>
+                    <Tag color={status ? 'red' : 'green'} key={id}>
                          {status ? 'Riêng tư' : 'Công khai'}
                     </Tag>
                ),
+          },
+          {
+               title: 'Danh mục cha',
+               key: 'parentId',
+               dataIndex: 'parentId',
+               render: (id) => (
+                    getParentCategories(id, categories)
+                         .map(({ name, id }, index) => {
+                              return <Tag
+                                   color='blue'
+                                   key={id}
+                                   className="ml-1"
+                              >
+                                   {name}
+                              </Tag>
+                         })
+               )
           },
           {
                title: 'Ngày tạo',
@@ -287,6 +346,7 @@ export default function Categories() {
                ),
           },
      ];
+     console.log(categories);
      return (
           <div>
                <Button
@@ -306,10 +366,10 @@ export default function Categories() {
                          dataSource={categories.map((category, index) => {
                               return { ...category, key: category.id }
                          })}
-                         pagination={{
-                              pageSize:
-                                   5
-                         }}
+                    // pagination={{
+                    //      pageSize:
+                    //           5
+                    // }}
                     />
                     {
                          selectedRowKeys.length > 0 &&
@@ -317,7 +377,7 @@ export default function Categories() {
                               className="absolute top-[-40px] left-0"
                               title="Bạn có chắc bạn muốn xoá các danh mục này không?"
                               placement="leftTop"
-                              onConfirm={handleDeleteCategories}
+                              onConfirm={handleDeleteManyCategory}
                               okText="Yes"
                               cancelText="No"
 
@@ -370,9 +430,9 @@ export default function Categories() {
 
                          </Form.Item>
                          {
-                              validateName && (
+                              validateForm?.name && (
                                    <Form.Item className="mb-0">
-                                        <span className="text-[red]">{validateName}</span>
+                                        <span className="text-[red]">{validateForm?.name}</span>
                                    </Form.Item>)
                          }
                          <Form.Item
@@ -387,6 +447,28 @@ export default function Categories() {
                                    ]}
                               />
                          </Form.Item>
+                         <Form.Item
+                              name="parentId"
+                              label="Danh Mục Cha"
+                         >
+                              <TreeSelect
+                                   showSearch
+                                   style={{ width: '100%' }}
+                                   value={formValue?.parentId}
+                                   dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                                   placeholder="Danh mục gốc"
+                                   allowClear
+                                   treeDefaultExpandAll
+                                   onChange={handleOnChangeParentId}
+                                   treeData={categoriesTreeData}
+                              />
+                         </Form.Item>
+                         {
+                              validateForm?.parentId && (
+                                   <Form.Item className="mb-0">
+                                        <span className="text-[red]">{validateForm?.parentId}</span>
+                                   </Form.Item>)
+                         }
                     </Form>
                </Modal>
           </div>
