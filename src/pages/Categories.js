@@ -151,12 +151,12 @@ export default function Categories() {
                               status: 0,
                               parentId: null,
                          });
+                         setIsModalOpen(false);
+                         setValidateForm(null);
                          notification.success({
                               message,
                               duration: 1.0
                          })
-                         setIsModalOpen(false);
-                         setValidateForm(null);
                          break;
                     case 404:
                          notification.error({
