@@ -16,15 +16,10 @@ export default function DropDow() {
      const handleLogOut = async () => {
           try {
                const token = Cookies.get("token");
-               const result = await dispatch(requestLogOut(token));
-               const data = unwrapResult(result);
-               const { status } = data;
-               if (status === 200) {
-                    Cookies.remove("token");
-                    Cookies.remove("refreshToken");
-                    router.push('/auth/dang-nhap');
-
-               }
+               await dispatch(requestLogOut(token));
+               Cookies.remove("token");
+               Cookies.remove("refreshToken");
+               router.push('/auth/dang-nhap');
           } catch (e) {
                notification.error({
                     message: 'lỗi server',

@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server'
 import { endPointApi } from './helper/endPointApi';
 const { API_TOKEN } = endPointApi;
 export async function middleware(request) {
-     let object = request.cookies.get('token');
+     const token = request.cookies.get('token');
      const res = await fetch(`${process.env.API}/${API_TOKEN}`,
           {
                method: 'POST',
                headers: {
-                    "Authorization": `Bearer${object?.value}`
+                    "Authorization": `Bearer${token?.value}`
                }
           });
      const data = await res.json();
@@ -21,7 +21,8 @@ export async function middleware(request) {
                return NextResponse.redirect(new URL('/', request.url));
           }
      }
+     return null;
 }
 export const config = {
-     matcher: ['/', '/auth/dang-nhap', '/categories:path*', '/courses:path*']
+     matcher: ['/', '/auth/dang-nhap', '/categories:path*', '/courses:path*', '/users:path*']
 }
