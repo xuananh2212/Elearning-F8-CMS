@@ -18,7 +18,7 @@ export default function Header() {
                               height={40}
                               alt="logo"
                          />
-                         <span className="text-[#242424] font-black text-l">Học Lập Trình Để đi Làm</span>
+                         <span className="text-[#242424] font-black text-l">F8 Admin</span>
                     </Link>
                </div>
                <Search />

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { FaCirclePlus } from "react-icons/fa6";
 import { message, Modal, Upload } from 'antd';
-import { requestUploadImage } from '@/helper/upload';
+import { requestUploadImage } from '@/utils/api/upload';
 import Image from 'next/image';
 const getBase64 = (file) =>
      new Promise((resolve, reject) => {
@@ -33,8 +33,6 @@ export default function UploadImage({ defaultImage, onChangeUrl }) {
           setFileList(newFileList);
           onChangeUrl(newFileList?.[0]?.response ?? "");
      };
-     console.log(fileList);
-
      const uploadButton = (
           <button className='flex items-center justify-center flex-col gap-1' style={{ border: 0, background: 'none' }} type="button">
                <FaCirclePlus className='text-[20px]' />

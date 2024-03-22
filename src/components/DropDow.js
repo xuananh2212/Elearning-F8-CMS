@@ -16,6 +16,7 @@ export default function DropDow() {
      const handleLogOut = async () => {
           try {
                const token = Cookies.get("token");
+               console.log(token);
                await dispatch(requestLogOut(token));
                Cookies.remove("token");
                Cookies.remove("refreshToken");
@@ -29,8 +30,11 @@ export default function DropDow() {
      }
      const requestLoadToken = async (token) => {
           try {
-               await dispatch(requestToken(token));
+               console.log(token);
+               const response = await dispatch(requestToken(token));
+               unwrapResult(response);
           } catch (e) {
+               console.log(e);
                notification.error({
                     message: 'lỗi server',
                     duration: 1.0,
@@ -40,6 +44,7 @@ export default function DropDow() {
      useEffect(() => {
           if (!user) {
                const token = Cookies.get("token");
+               console.log(token);
                requestLoadToken(token);
           }
      }, []);

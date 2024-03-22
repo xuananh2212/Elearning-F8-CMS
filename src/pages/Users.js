@@ -18,8 +18,9 @@ import { MdEdit } from "react-icons/md";
 import Image from 'next/image';
 import { useForm } from 'antd/es/form/Form';
 import UploadImage from '@/components/UploadImage';
-import { requestUploadImage } from '@/helper/upload';
 import { RiDeleteBin2Fill } from "react-icons/ri";
+import { userSlices } from "@/store/slices/userSlices"
+const { resetValidateUser } = userSlices.actions;
 const { TextArea } = Input;
 export default function Users() {
      const dispatch = useDispatch();
@@ -30,7 +31,7 @@ export default function Users() {
      const loading = useSelector(state => state.user.loading);
      const users = useSelector(state => state.user.users);
      const [formValue, setFormValue] = useState(null);
-     const [validateForm, setValidateForm] = useState(null);
+     const validateUser = useSelector(state => state.user.validateUser);
      const [confirmLoading, setConfirmLoading] = useState(false);
      const [form] = useForm();
      const showCreateModal = () => {
@@ -38,11 +39,11 @@ export default function Users() {
           form.resetFields(null);
           setIsModalOpen(true);
      };
-     const handleCancel = () => {
+     const handleCancel = async () => {
+          await dispatch(resetValidateUser());
           form.resetFields(null);
           setFormValue(null);
           setIsEdit(false);
-          setValidateForm(null);
           setIsModalOpen(false);
      };
      const onSelectChange = (newSelectedRowKeys) => {
@@ -54,7 +55,6 @@ export default function Users() {
           form.setFieldsValue(user);
           setIsModalOpen(true);
      }
-     console.log(form, formValue);
      const rowSelection = {
           selectedRowKeys,
           onChange: onSelectChange,
@@ -96,6 +96,7 @@ export default function Users() {
                },
           ],
      };
+     console.log(users);
      const requestLoadUsers = async () => {
           try {
                const response = await dispatch(requestGetUsers());
@@ -110,19 +111,18 @@ export default function Users() {
                })
           }
      }
-     console.log(urlAvatar);
      const handleEditUser = async () => {
           setConfirmLoading(true);
           try {
-               const response = await dispatch(requestEditUser({ ...formValue, avatar: urlAvatar }));
-               const { status, errors, message } = unwrapResult(response);
-               if (status !== 200) {
-                    setValidateForm(errors);
-                    throw new Error(message);
+               const { phone } = formValue;
+               if (!phone) {
+                    delete formValue.phone;
                }
+               const response = await dispatch(requestEditUser({ ...formValue, avatar: urlAvatar }));
+               const { message } = unwrapResult(response);
+               await dispatch(resetValidateUser());
                setIsEdit(false);
                setIsModalOpen(false);
-               setValidateForm(null);
                form.resetFields(null);
                setFormValue(null);
                notification.success(
@@ -135,7 +135,7 @@ export default function Users() {
           } catch (e) {
                notification.error(
                     {
-                         message: e?.message,
+                         message: e?.message || 'lỗi server',
                          duration: 1.0
                     });
                setConfirmLoading(false);
@@ -146,15 +146,15 @@ export default function Users() {
      const handleAddUser = async () => {
           setConfirmLoading(true);
           try {
-               const response = await dispatch(requestResgiter({ ...formValue, avatar: urlAvatar }));
-               const { status, message, errors } = unwrapResult(response);
-               if (status !== 201) {
-                    setValidateForm(errors);
-                    throw new Error("Thêm Không Thành Công!");
+               const { phone } = formValue;
+               if (!phone) {
+                    delete formValue.phone;
                }
+               const response = await dispatch(requestResgiter({ ...formValue, avatar: urlAvatar }));
+               const { message } = unwrapResult(response);
+               await dispatch(resetValidateUser());
                setIsEdit(false);
                setIsModalOpen(false);
-               setValidateForm(null);
                form.resetFields(null);
                setFormValue(null);
                notification.success(
@@ -304,7 +304,6 @@ export default function Users() {
                ),
           }
      ];
-     console.log(formValue);
      return (
           <div>
                <Button
@@ -416,9 +415,9 @@ export default function Users() {
                                         <Input autoComplete="user-name" onChange={(e) => setFormValue({ ...formValue, name: e.target.value })} />
                                    </Form.Item>
                                    {
-                                        validateForm?.name && (
+                                        validateUser?.name && (
                                              <Form.Item className="mb-0">
-                                                  <span className="text-[red]">{validateForm?.name}</span>
+                                                  <span className="text-[red]">{validateUser?.name}</span>
                                              </Form.Item>)
                                    }
                                    <Form.Item
@@ -435,9 +434,9 @@ export default function Users() {
                                         <Input autoComplete="user-email" onChange={(e) => setFormValue({ ...formValue, email: e.target.value })} />
                                    </Form.Item>
                                    {
-                                        validateForm?.email && (
+                                        validateUser?.email && (
                                              <Form.Item className="mb-0">
-                                                  <span className="text-[red]">{validateForm?.email}</span>
+                                                  <span className="text-[red]">{validateUser?.email}</span>
                                              </Form.Item>)
                                    }
                                    {
@@ -457,9 +456,9 @@ export default function Users() {
                                                   <Input.Password autoComplete="new-password" onChange={(e) => setFormValue({ ...formValue, password: e.target.value })} />
                                              </Form.Item>
                                              {
-                                                  validateForm?.password && (
+                                                  validateUser?.password && (
                                                        <Form.Item className="mb-0">
-                                                            <span className="text-[red]">{validateForm?.password}</span>
+                                                            <span className="text-[red]">{validateUser?.password}</span>
                                                        </Form.Item>)
                                              }
                                              <Form.Item
@@ -476,9 +475,9 @@ export default function Users() {
                                                   <Input.Password autoComplete="new-password" onChange={(e) => setFormValue({ ...formValue, passwordRe: e.target.value })} />
                                              </Form.Item>
                                              {
-                                                  validateForm?.password && (
+                                                  validateUser?.password && (
                                                        <Form.Item className="mb-0">
-                                                            <span className="text-[red]">{validateForm?.password}</span>
+                                                            <span className="text-[red]">{validateUser?.password}</span>
                                                        </Form.Item>)
                                              }
 
@@ -494,9 +493,9 @@ export default function Users() {
                                         <Input onChange={(e) => setFormValue({ ...formValue, phone: e.target.value })} />
                                    </Form.Item>
                                    {
-                                        validateForm?.phone && (
+                                        validateUser?.phone && (
                                              <Form.Item className="mb-0">
-                                                  <span className="text-[red]">{validateForm?.phone}</span>
+                                                  <span className="text-[red]">{validateUser?.phone}</span>
                                              </Form.Item>)
                                    }
 

@@ -15,6 +15,8 @@ import moment from "moment";
 import { useForm } from "antd/es/form/Form";
 import { RiDeleteBin2Fill } from "react-icons/ri";
 import { getParentCategories } from "@/helper/parentCategories";
+import { categorySlices } from "@/store/slices/categorySlices";
+const { resetValidateCategory } = categorySlices.actions;
 export default function Categories() {
      const [selectedRowKeys, setSelectedRowKeys] = useState([]);
      const dispatch = useDispatch();
@@ -22,8 +24,8 @@ export default function Categories() {
      const loading = useSelector((state) => state.category.loading);
      const categories = useSelector((state) => state.category.categories);
      const categoriesTreeData = useSelector((state) => state.category.categoriesTreeData);
+     const validateCategory = useSelector((state) => state.category.validateCategory);
      const [loadingSubmit, setLoadingSubmit] = useState(false);
-     const [validateForm, setValidateForm] = useState(null);
      const [isModalOpen, setIsModalOpen] = useState(false);
      const [isEdit, setIsEdit] = useState(false);
      const [formValue, setFormValue] = useState({
@@ -34,7 +36,8 @@ export default function Categories() {
      const handleOnChangeParentId = (value) => {
           setFormValue({ ...formValue, parentId: value });
      }
-     const handleCancel = () => {
+     const handleCancel = async () => {
+          await dispatch(resetValidateCategory());
           form.resetFields();
           setFormValue({
                name: '',
@@ -109,29 +112,24 @@ export default function Categories() {
           setLoadingSubmit(true);
           try {
                const response = await dispatch(requestAddCategory(formValue));
-               const { status, errors } = unwrapResult(response);
-               if (status === 201) {
-                    form.resetFields();
-                    setFormValue(
-                         {
-                              name: '',
-                              status: 0,
-                              parentId: null,
-                         }
-                    );
-                    notification.success({
-                         message: "Thêm danh mục thành công",
-                         duration: 1.0
-                    })
-                    setIsModalOpen(false);
-                    setValidateForm(null);
-               } else {
-                    setValidateForm(errors);
-               }
-
+               unwrapResult(response);
+               await dispatch(resetValidateCategory());
+               form.resetFields();
+               setFormValue(
+                    {
+                         name: '',
+                         status: 0,
+                         parentId: null,
+                    }
+               );
+               notification.success({
+                    message: "Thêm danh mục thành công",
+                    duration: 1.0
+               })
+               setIsModalOpen(false)
           } catch (e) {
                notification.error({
-                    message: 'lỗi server',
+                    message: e?.message,
                     duration: 1.0
                })
           }
@@ -142,22 +140,22 @@ export default function Categories() {
           setLoadingSubmit(true);
           try {
                const response = await dispatch(requestUpdateCategory(formValue));
-               const { status, message, errors } = unwrapResult(response);
+               const { message } = unwrapResult(response);
+               await dispatch(resetValidateCategory());
+               form.resetFields();
+               setFormValue({
+                    name: '',
+                    status: 0,
+                    parentId: null,
+               });
+               notification.success({
+                    message,
+                    duration: 1.0
+               });
+               setIsModalOpen(false);
+          } catch (e) {
+               const { status, message } = e;
                switch (status) {
-                    case 200:
-                         form.resetFields();
-                         setFormValue({
-                              name: '',
-                              status: 0,
-                              parentId: null,
-                         });
-                         setIsModalOpen(false);
-                         setValidateForm(null);
-                         notification.success({
-                              message,
-                              duration: 1.0
-                         })
-                         break;
                     case 404:
                          notification.error({
                               message,
@@ -165,21 +163,18 @@ export default function Categories() {
                          })
                          break;
                     case 400:
-                         setValidateForm(errors);
                          break;
                     default:
-                         throw new Error(message);
+                         notification.error({
+                              message: e?.message,
+                              duration: 1.0
+                         });
+                         break;
                }
 
-          } catch (e) {
-               notification.error({
-                    message: e?.message || 'lỗi server',
-                    duration: 1.0
-               })
           }
           setSelectedRowKeys([]);
           setLoadingSubmit(false);
-
      };
      const handleDeleteCategory = async (id) => {
           try {
@@ -261,13 +256,6 @@ export default function Categories() {
      useEffect(() => {
           requestLoadCategories();
      }, []);
-
-     useEffect(() => {
-          if (isModalOpen) {
-               setValidateForm(null);
-          }
-
-     }, [isModalOpen]);
      const columns = [
           {
                title: 'STT',
@@ -430,9 +418,9 @@ export default function Categories() {
 
                          </Form.Item>
                          {
-                              validateForm?.name && (
+                              validateCategory?.name && (
                                    <Form.Item className="mb-0">
-                                        <span className="text-[red]">{validateForm?.name}</span>
+                                        <span className="text-[red]">{validateCategory?.name}</span>
                                    </Form.Item>)
                          }
                          <Form.Item
@@ -464,9 +452,9 @@ export default function Categories() {
                               />
                          </Form.Item>
                          {
-                              validateForm?.parentId && (
+                              validateCategory?.parentId && (
                                    <Form.Item className="mb-0">
-                                        <span className="text-[red]">{validateForm?.parentId}</span>
+                                        <span className="text-[red]">{validateCategory?.parentId}</span>
                                    </Form.Item>)
                          }
                     </Form>

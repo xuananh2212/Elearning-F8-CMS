@@ -11,13 +11,21 @@ const initialState = {
      userInfo: null,
      users: [],
      loading: false,
+     validateUser: null,
+     validateLogin: null,
      accessToken: null,
      refreshToken: null
 }
-const userSlices = createSlice({
+export const userSlices = createSlice({
      name: 'users',
      initialState,
      reducers: {
+          resetValidateUser: (state, action) => {
+               state.validateUser = null
+          },
+          resetValidateLogin: (state, action) => {
+               state.validateLogin = null
+          }
      },
      extraReducers: (builder) => {
           const listResquests =
@@ -31,9 +39,21 @@ const userSlices = createSlice({
                builder.addCase(resquest.pending, (state) => {
                     state.loading = true;
                });
-               builder.addCase(resquest.rejected, (state) => {
-                    state.loading = true;
-               });
+          });
+          builder.addCase(requestResgiter.rejected, (state, action) => {
+               state.validateUser = action.payload?.errors;
+               state.loading = false;
+          });
+          builder.addCase(requestLogin.rejected, (state, action) => {
+               state.validateLogin = action.payload?.errors;
+               state.loading = false;
+          });
+          builder.addCase(requestLogOut.rejected, (state, action) => {
+               state.loading = false;
+          });
+          builder.addCase(requestEditUser.rejected, (state, action) => {
+               state.validateUser = action.payload?.errors;
+               state.loading = false;
           });
           builder.addCase(requestLogin.fulfilled, (state, action) => {
                state.userInfo = action.payload.user;
@@ -52,33 +72,23 @@ const userSlices = createSlice({
                state.loading = false;
           });
           builder.addCase(requestGetUsers.fulfilled, (state, action) => {
-               if (action.payload.status === 200) {
-                    state.users = action.payload.users;
-               }
+               state.users = action.payload.users;
                state.loading = false;
           });
           builder.addCase(requestEditUser.fulfilled, (state, action) => {
-               if (action.payload.status === 200) {
-                    state.users = state.users.map((user) => user.id === action?.payload?.user?.id ? action.payload.user : user);
-               }
+               state.users = state.users.map((user) => user.id === action?.payload?.user?.id ? action.payload.user : user);
                state.loading = false;
           });
           builder.addCase(requestDeleteUser.fulfilled, (state, action) => {
-               if (action.payload.status === 200) {
-                    state.users = state.users.filter(({ id }) => id !== action.payload.userId);
-               }
+               state.users = state.users.filter(({ id }) => id !== action.payload.userId);
                state.loading = false;
           });
           builder.addCase(requestDeleteManyUser.fulfilled, (state, action) => {
-               if (action.payload.status === 200) {
-                    state.users = state.users.filter(({ id }) => !action.payload?.userIds.includes(id));
-               }
+               state.users = state.users.filter(({ id }) => !action.payload?.userIds.includes(id));
                state.loading = false;
           });
           builder.addCase(requestResgiter.fulfilled, (state, action) => {
-               if (action.payload.status === 201) {
-                    state.users = [...state.users, action.payload.user];
-               }
+               state.users = [...state.users, action.payload.user];
                state.loading = false;
           });
      }

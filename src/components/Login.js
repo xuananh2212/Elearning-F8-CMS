@@ -6,37 +6,42 @@ import { useDispatch, useSelector } from 'react-redux';
 import { unwrapResult } from '@reduxjs/toolkit';
 import { requestLogin } from '@/store/middlewares/auth.middewares';
 import { useRouter } from 'next/navigation';
+import { userSlices } from '@/store/slices/userSlices';
+const { resetValidateLogin } = userSlices.actions;
 export default function Login() {
      const dispatch = useDispatch();
      const router = useRouter();
      const user = useSelector((state) => state.user.userInfo);
      const accessToken = useSelector((state) => state.user.accessToken);
      const refreshToken = useSelector((state) => state.user.refreshToken);
+     const validateLogin = useSelector((state) => state.user.validateLogin);
      const [formError, setFormError] = useState(null);
      const loading = useSelector((state) => state.user.loading);
      const handleSubmit = async (values) => {
           try {
                const result = await dispatch(requestLogin(values));
-               const data = unwrapResult(result);
-               const { code, message } = data;
+               unwrapResult(result);
+               await dispatch(resetValidateLogin());
+          } catch (err) {
+               const { code, message } = err;
                switch (code) {
                     case 1:
-                         setFormError(null);
+                         await dispatch(resetValidateLogin());
                          notification.error({
                               message,
                               duration: 1.0,
                          });
                          break;
                     case 2:
-                         setFormError(data.errors);
+                         break;
+                    default:
+                         notification.error({
+                              message: 'lỗi server',
+                              duration: 1.0,
+                         });
                          break;
                }
 
-          } catch (err) {
-               notification.error({
-                    message: 'lỗi server',
-                    duration: 1.0,
-               });
           }
      };
      const onFinishFailed = (errorInfo) => {
@@ -86,31 +91,31 @@ export default function Login() {
                               autoComplete="off"
                          >
                               <Form.Item
-                                   label="Email"
                                    name="email"
+                                   label={
+                                        <div className='flex gap-2'>
+                                             <span className='text-[red] text-[20px] inline-block align-middle text-center'>*</span>
+                                             <span className='text-[16px]'>Email: </span>
+                                        </div>
+                                   }
                                    className='w-full mb-2'
-                                   rules={[
-                                        {
-                                             required: true,
-                                             message: 'Please input your email!'
-                                        }]}
                               >
                                    <Input className='w-full p-2' placeholder="vui lòng nhập Email" />
                               </Form.Item>
-                              {formError?.email && <span className='mt-1 text-[#ff0000]'>{formError?.email}</span>}
+                              {validateLogin?.email && <span className='mt-1 text-[#ff0000]'>{validateLogin?.email}</span>}
                               <Form.Item
-                                   label="Password"
+                                   label={
+                                        <div className='flex gap-2'>
+                                             <span className='text-[red] text-[20px] inline-block align-middle text-center'>*</span>
+                                             <span className='text-[16px]'>Password: </span>
+                                        </div>
+                                   }
                                    name="password"
                                    className='w-full mt-4 mb-2'
-                                   rules={[
-                                        {
-                                             required: true,
-                                             message: 'Please input your password!'
-                                        }]}
                               >
                                    <Input.Password className='w-full p-2' placeholder="vui lòng nhập Password" autoComplete="on" />
                               </Form.Item>
-                              {formError?.password && <span className='mt-1 text-[#ff0000]'>{formError?.password}</span>}
+                              {validateLogin?.password && <span className='mt-1 text-[#ff0000]'>{validateLogin?.password}</span>}
 
                               <Form.Item
                                    name="remember"
