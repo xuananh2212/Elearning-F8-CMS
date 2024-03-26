@@ -20,6 +20,6 @@ export const requestDeleteUser = createAsyncThunk('users/delete-user', async (id
      return res.data;
 });
 export const requestDeleteManyUser = createAsyncThunk('users/delete-many-user', async (props) => {
-     const res = await request.post(`${process.env.NEXT_PUBLIC_API}/${USERS}/delete-many-user`, props);
+     const res = await request.post(`${process.env.NEXT_PUBLIC_API}/${USERS}/delete/many-user`, props);
      return res.data;
 });

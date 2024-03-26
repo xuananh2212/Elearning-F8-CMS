@@ -379,6 +379,7 @@ export default function Categories() {
                     }
                </div>
                <Modal
+                    align="center"
                     title={isEdit ? "Sửa danh mục" : "Tạo danh mục"}
                     open={isModalOpen}
                     onOk={isEdit ? handleEditCategory : handleAddCategory}
@@ -401,7 +402,7 @@ export default function Categories() {
                     ]}
                >
                     <Form
-                         className="mt-2 p-5 rounded-lg border-solid border-[1px] border-[#b2b2b2]"
+                         className="mt-2 p-5 rounded-lg"
                          layout="vertical"
                          name="create-update-category"
                          form={form}
@@ -412,7 +413,9 @@ export default function Categories() {
                          <Form.Item
                               className="mb-1"
                               name="name"
-                              label="Tên danh mục"
+                              label={
+                                   <h3 className="text-[16px]">Tên danh mục</h3>
+                              }
                          >
                               <Input onChange={(e) => handleChangeName(e.target.value)} />
 
@@ -425,7 +428,9 @@ export default function Categories() {
                          }
                          <Form.Item
                               name="status"
-                              label="Trạng thái"
+                              label={
+                                   <h3 className="text-[16px]">Trạng thái:</h3>
+                              }
                          >
                               <Select
                                    onChange={handleChangeStatus}
@@ -437,7 +442,9 @@ export default function Categories() {
                          </Form.Item>
                          <Form.Item
                               name="parentId"
-                              label="Danh Mục Cha"
+                              label={
+                                   <h3 className="text-[16px]">Danh mục cha:</h3>
+                              }
                          >
                               <TreeSelect
                                    showSearch

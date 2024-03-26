@@ -19,7 +19,7 @@ export const requestDeleteCategory = createAsyncThunk('categories/delete', async
      return res.data;
 });
 export const requestDeleteManyCategory = createAsyncThunk('categories/delete-many', async (props) => {
-     const res = await request.post(`${CATEGORIES}/delete-many-category`, props);
+     const res = await request.post(`${CATEGORIES}/delete/many-category`, props);
      return res.data;
 });
 export const requestUpdateCategory = createAsyncThunk('categories/update', async (props, { rejectWithValue }) => {

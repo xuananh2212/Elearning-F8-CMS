@@ -11,6 +11,7 @@ import {
      requestGetCategories
 } from "@/store/middlewares/category.middewares";
 import { requestGetAllCourse, requestAddCourse, requestUpdateCourse, requestDeleteCourse } from "@/store/middlewares/course.middewares";
+import { requestGetDiscounts } from "@/store/middlewares/discount.middewares";
 import { requestGetAllTypeCourse } from "@/store/middlewares/typeCourse.middewares";
 import { unwrapResult } from "@reduxjs/toolkit";
 import TextEdit from "@/components/TextEdit";
@@ -26,6 +27,7 @@ export default function Courses() {
      const dispatch = useDispatch();
      const editorRef = useRef(null);
      const courses = useSelector(state => state.course.courses);
+     const discounts = useSelector(state => state.discount.discounts);
      const categories = useSelector(state => state.category.categories);
      const validateCourse = useSelector(state => state.course.validateCourse);
      const typeCourses = useSelector(state => state.typeCourse.typeCourses);
@@ -119,6 +121,10 @@ export default function Courses() {
      const handleDeleteManyCourse = () => {
 
      }
+     const handleChangeDiscount = (value) => {
+          const discount = discounts.find(({ id }) => id === value);
+          setFormValue({ ...formValue, discountId: value, percent: discount?.percent || 0 })
+     }
      const handleChangeTitle = (e) => {
           setFormValue({ ...formValue, title: e.target.value });
      }
@@ -134,15 +140,13 @@ export default function Courses() {
      const handleChangePrice = (value) => {
           setFormValue({ ...formValue, price: value });
      }
-     const handleChangePromotionPercentage = (value) => {
-          setFormValue({ ...formValue, promotionPercentage: value });
-     }
+
      const handleChangeDiscountedPrice = () => {
           const price = !formValue?.price ? 0 : formValue.price;
-          const promotionPercentage = !formValue?.promotionPercentage ? 0 : formValue.promotionPercentage;
-          const disCountedPrice = price - (price * promotionPercentage) / 100;
+          const percent = !formValue?.percent ? 0 : formValue.percent;
+          const disCountedPrice = price - (price * percent) / 100;
           setFormValue({ ...formValue, disCountedPrice });
-          form.setFieldsValue({ disCountedPrice });
+          form.setFieldsValue({ disCountedPrice: Math.floor(disCountedPrice) });
      }
      const onSelectChange = (newSelectedRowKeys) => {
           setSelectedRowKeys(newSelectedRowKeys);
@@ -243,17 +247,30 @@ export default function Courses() {
                })
           }
      };
+     const requestLoadDiscounts = async () => {
+          try {
+               const response = await dispatch(requestGetDiscounts());
+               unwrapResult(response);
+          } catch (e) {
+               notification.error({
+                    message: e?.message,
+                    duration: 1.0,
+               });
+          }
+     }
      useEffect(() => {
           if (!categories.length) {
                requestLoadCategories();
+          }
+          if (!discounts.length) {
+               requestLoadDiscounts();
           }
           requestLoadCourses();
           requestLoadTypeCourse();
      }, []);
      useEffect(() => {
-          console.log(2);
           handleChangeDiscountedPrice();
-     }, [formValue?.price, formValue?.promotionPercentage])
+     }, [formValue?.price, formValue?.percent])
      const columns =
           [
                {
@@ -533,7 +550,7 @@ export default function Courses() {
                                         <Select
                                              onChange={handleChangeTypeCourse}
 
-                                             options={typeCourses && typeCourses.map(({ id, name }) => {
+                                             options={typeCourses.length && typeCourses.map(({ id, name }) => {
                                                   return { value: id, label: name }
                                              })}
                                         />
@@ -564,20 +581,23 @@ export default function Courses() {
                                                             </Form.Item>)
                                                   }
                                                   <Form.Item
-                                                       name="promotionPercentage"
+                                                       name="discountId"
                                                        label=
                                                        {
                                                             <div className='flex gap-2'>
                                                                  <span className='text-[red] text-[20px] inline-block align-middle text-center'>*</span>
-                                                                 <span className='text-[16px] font-medium'>Khuyến mãi(%): </span>
+                                                                 <span className='text-[16px] font-medium'>Phiếu Khuyến mại: </span>
                                                             </div>
                                                        }
                                                   >
-                                                       <InputNumber
-                                                            min={0}
-                                                            style={{ width: '100%' }}
-                                                            max={100}
-                                                            onChange={handleChangePromotionPercentage} />
+                                                       <Select
+                                                            onChange={handleChangeDiscount}
+
+                                                            options={discounts.length && discounts.map(({ id, discountType, percent }) => {
+                                                                 return { value: id, label: `${discountType} - ( ${percent}% )` }
+                                                            })}
+                                                       />
+
                                                   </Form.Item>
                                                   <Form.Item
                                                        name="disCountedPrice"

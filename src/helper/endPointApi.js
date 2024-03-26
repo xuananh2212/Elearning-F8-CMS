@@ -7,5 +7,6 @@ export const endPointApi = {
      TYPE_COURSES: 'type-course/v1',
      USERS: 'user/v1',
      COURSES: 'course/v1',
-     UPLOAD_IMAGE: 'upload/v1/image'
+     UPLOAD_IMAGE: 'upload/v1/image',
+     DISCOUNTS: 'discount/v1'
 }

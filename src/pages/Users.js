@@ -22,6 +22,7 @@ import { RiDeleteBin2Fill } from "react-icons/ri";
 import { userSlices } from "@/store/slices/userSlices"
 const { resetValidateUser } = userSlices.actions;
 const { TextArea } = Input;
+const avatarDefault = 'http://res.cloudinary.com/daxftrleb/image/upload/v1709733165/e-learning/xpasxyscc4jh0tz7rlzu.png';
 export default function Users() {
      const dispatch = useDispatch();
      const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,19 +31,25 @@ export default function Users() {
      const [urlAvatar, setUrlAvatar] = useState(null);
      const loading = useSelector(state => state.user.loading);
      const users = useSelector(state => state.user.users);
-     const [formValue, setFormValue] = useState(null);
+     const [formValue, setFormValue] = useState({
+          avatar: avatarDefault
+     });
      const validateUser = useSelector(state => state.user.validateUser);
      const [confirmLoading, setConfirmLoading] = useState(false);
      const [form] = useForm();
      const showCreateModal = () => {
-          setFormValue(null);
+          setFormValue({
+               avatar: avatarDefault
+          });
           form.resetFields(null);
           setIsModalOpen(true);
      };
      const handleCancel = async () => {
           await dispatch(resetValidateUser());
           form.resetFields(null);
-          setFormValue(null);
+          setFormValue({
+               avatar: avatarDefault
+          });
           setIsEdit(false);
           setIsModalOpen(false);
      };
@@ -52,7 +59,11 @@ export default function Users() {
      const showEditModal = (user) => {
           setIsEdit(true);
           setFormValue(user);
+          if (!user.avatar) {
+               user.avatar = avatarDefault;
+          }
           form.setFieldsValue(user);
+          setUrlAvatar(user?.avatar || avatarDefault)
           setIsModalOpen(true);
      }
      const rowSelection = {
@@ -96,7 +107,6 @@ export default function Users() {
                },
           ],
      };
-     console.log(users);
      const requestLoadUsers = async () => {
           try {
                const response = await dispatch(requestGetUsers());
@@ -124,7 +134,9 @@ export default function Users() {
                setIsEdit(false);
                setIsModalOpen(false);
                form.resetFields(null);
-               setFormValue(null);
+               setFormValue({
+                    avatar: avatarDefault
+               });
                notification.success(
                     {
                          message,
@@ -156,7 +168,9 @@ export default function Users() {
                setIsEdit(false);
                setIsModalOpen(false);
                form.resetFields(null);
-               setFormValue(null);
+               setFormValue({
+                    avatar: avatarDefault
+               });
                notification.success(
                     {
                          message,
@@ -390,7 +404,7 @@ export default function Users() {
                                         }
                                    >
                                         <UploadImage
-                                             defaultImage={formValue?.avatar || 'http://res.cloudinary.com/daxftrleb/image/upload/v1709733165/e-learning/xpasxyscc4jh0tz7rlzu.png'}
+                                             defaultImage={formValue?.avatar}
                                              onChangeUrl={(value) => setUrlAvatar(value)}
                                         />
                                    </Form.Item>
