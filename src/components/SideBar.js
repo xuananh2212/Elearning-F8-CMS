@@ -18,9 +18,10 @@ const menu = [
 ]
 export default function SideBar() {
      const pathname = usePathname();
+     const isCoursePage = pathname.includes("/courses/");
      return (
-          <aside className='flex-shrink-0'>
-               <div className='w-[96px] sticky top-[74px] left-0 px-2 z-10'>
+          <aside className={`transition-transform transform flex-shrink-0 ${isCoursePage ? 'fixed -translate-x-full' : ' translate-x-0'} `}>
+               <div className='w-[96px] sticky top-[74px] left-0 px-2 z-10' >
                     <ul className='mt-4'>
                          {
                               menu.map(({ title, icon, path }, index) => <li key={index}>

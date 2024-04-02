@@ -11,6 +11,7 @@ export async function middleware(request) {
                }
           });
      const data = await res.json();
+     console.log(data);
      const { pathname } = request.nextUrl;
      if (pathname !== '/auth/dang-nhap') {
           if (data.status === 401) {

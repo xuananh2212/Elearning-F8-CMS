@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { requestGetAllCourse, requestAddCourse, requestUpdateCourse, requestDeleteCourse } from "../middlewares/course.middewares";
+import { requestGetAllCourse, requestAddCourse, requestUpdateCourse, requestDeleteCourse, requestDeleteManyCourse } from "../middlewares/course.middewares";
 const initialState = {
      loading: false,
      courses: [],
@@ -16,7 +16,8 @@ export const courseSlices = createSlice({
      },
      extraReducers: (builder) => {
           const listRequests = [
-               requestGetAllCourse, requestDeleteCourse
+               requestGetAllCourse, requestDeleteCourse,
+               requestDeleteManyCourse
           ]
           listRequests.forEach((request) => {
                builder.addCase(request.pending, (state, action) => {
@@ -52,7 +53,10 @@ export const courseSlices = createSlice({
                state.courses = state.courses.filter((course) => course?.id !== action.payload.courseId);
                state.loading = false;
           });
-
+          builder.addCase(requestDeleteManyCourse.fulfilled, (state, action) => {
+               state.courses = state.courses.filter((course) => !action.payload?.courseIds.includes(course.id));
+               state.loading = false;
+          });
      }
 })
 export default courseSlices.reducer;

@@ -10,7 +10,11 @@ import { InputNumber } from 'antd';
 import {
      requestGetCategories
 } from "@/store/middlewares/category.middewares";
-import { requestGetAllCourse, requestAddCourse, requestUpdateCourse, requestDeleteCourse } from "@/store/middlewares/course.middewares";
+import {
+     requestGetAllCourse, requestAddCourse,
+     requestDeleteManyCourse, requestUpdateCourse,
+     requestDeleteCourse
+} from "@/store/middlewares/course.middewares";
 import { requestGetDiscounts } from "@/store/middlewares/discount.middewares";
 import { requestGetAllTypeCourse } from "@/store/middlewares/typeCourse.middewares";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -18,6 +22,7 @@ import TextEdit from "@/components/TextEdit";
 import UploadImage from "@/components/UploadImage";
 import { courseSlices } from "@/store/slices/courseSlices";
 import Image from "next/image";
+import Link from "next/link";
 const { resetValidateCourse } = courseSlices.actions;
 const thumbDefault = 'http://res.cloudinary.com/daxftrleb/image/upload/v1711213412/e-learning/jmvs3r7br0kakgayybkf.png';
 export default function Courses() {
@@ -34,41 +39,43 @@ export default function Courses() {
      const [urlAvatar, setUrlAvatar] = useState(thumbDefault);
      const [confirmLoading, setConfirmLoading] = useState(false);
      const [form] = useForm();
-     const [formValue, setFormValue] = useState({ status: 0 });
+     const [id, setId] = useState("");
+     const [typeCourseId, setTypeCourseId] = useState("");
+     const [price, setPrice] = useState("");
+     const [discountPercent, setDiscountPercent] = useState("");
      const loading = useSelector((state) => state.category.loading);
      const showCreateModal = () => {
+          form.resetFields();
+          editorRef.current?.setContent("");
           setIsEdit(false);
           setIsModalOpen(true);
      };
      const handleCancel = async () => {
+          await dispatch(resetValidateCourse());
           form.resetFields();
-          setFormValue({
-               status: 0,
-               typeCourseId: typeCourses.length ? typeCourses[0]?.id : null
-          });
+          setTypeCourseId(null);
           setUrlAvatar(thumbDefault);
           editorRef.current.setContent("");
           setIsModalOpen(false);
      };
-     console.log(validateCourse);
      const handleEditCourse = async () => {
           try {
-               const response = await dispatch(requestUpdateCourse({ ...formValue, thumb: urlAvatar, desc: editorRef.current.getContent() }));
+               const formValues = form?.getFieldsValue();
+               delete formValues?.typeCourseName;
+               delete formValues?.categoryName;
+               const response = await dispatch(requestUpdateCourse({ ...formValues, id, thumb: urlAvatar, desc: editorRef.current.getContent() }));
                const { message } = unwrapResult(response);
                await dispatch(resetValidateCourse());
                setIsEdit(false);
+               setTypeCourseId(null);
+               setDiscountPercent(null);
+               setPrice(null);
                setIsModalOpen(false);
                form.resetFields(null);
-               setFormValue({
-                    status: 0,
-                    typeCourseId: 1
-               });
                notification.success({
                     message,
                     duration: 1.0
                });
-
-
           } catch (e) {
                notification.error({
                     message: e.message,
@@ -81,16 +88,15 @@ export default function Courses() {
      const handleAddCourse = async () => {
           setConfirmLoading(true);
           try {
-               const response = await dispatch(requestAddCourse({ ...formValue, thumb: urlAvatar, desc: editorRef.current.getContent() }));
+               const formValues = form.getFieldsValue();
+               delete formValues?.typeCourseName;
+               delete formValues?.categoryName;
+               const response = await dispatch(requestAddCourse({ ...formValues, thumb: urlAvatar, desc: editorRef.current?.getContent() }));
                const { message } = unwrapResult(response);
                await dispatch(resetValidateCourse());
                setIsEdit(false);
                setIsModalOpen(false);
-               form.resetFields(null);
-               setFormValue({
-                    status: 0,
-                    typeCourseId: 1
-               });
+               form.resetFields();
                notification.success({
                     message,
                     duration: 1.0
@@ -108,45 +114,68 @@ export default function Courses() {
      };
      const showEditModal = (course) => {
           setIsEdit(true);
-          setFormValue(course);
           editorRef.current?.setContent(course?.desc);
+          setId(course?.id);
+          setPrice(course?.price);
+          setDiscountPercent(course?.percent);
+          setTypeCourseId(course?.typeCourseId);
           form.setFieldsValue(course);
           setUrlAvatar(course?.thumb);
           setIsModalOpen(true);
      }
-     console.log(formValue);
      const handleChangeTypeCourse = (value) => {
-          setFormValue({ ...formValue, typeCourseId: value });
+          setTypeCourseId(value);
+          form.setFieldValue("typeCourseId", value);
      }
-     const handleDeleteManyCourse = () => {
+     const handleDeleteManyCourse = async () => {
+          if (selectedRowKeys.length) {
+               try {
+                    const response = await dispatch(requestDeleteManyCourse({ courseIds: selectedRowKeys }));
+                    const { message } = unwrapResult(response);
+                    await dispatch(resetValidateCourse());
+                    notification.success({
+                         message,
+                         duration: 1.0
+                    });
+                    setSelectedRowKeys([]);
+               } catch (e) {
+                    notification.error({
+                         message: e.message,
+                         duration: 1.0
+                    })
+               }
+
+          }
 
      }
      const handleChangeDiscount = (value) => {
           const discount = discounts.find(({ id }) => id === value);
-          setFormValue({ ...formValue, discountId: value, percent: discount?.percent || 0 })
+          setDiscountPercent(discount?.percent);
      }
      const handleChangeTitle = (e) => {
-          setFormValue({ ...formValue, title: e.target.value });
+          form.setFieldValue("title", e.target.value);
      }
      const handleChangeSlug = (e) => {
-          setFormValue({ ...formValue, slug: e.target.value });
+          form.setFieldValue("slug", e.target.value);
      }
      const handleChangeStatus = (value) => {
-          setFormValue({ ...formValue, status: value });
+          form.setFieldValue("status", value);
      }
      const handleChangeCategory = (value) => {
-          setFormValue({ ...formValue, categoryId: value });
+          form.setFieldValue("categoryId", value);
      }
      const handleChangePrice = (value) => {
-          setFormValue({ ...formValue, price: value });
+          setPrice(value);
+          form.setFieldValue("price", value);
      }
-
      const handleChangeDiscountedPrice = () => {
-          const price = !formValue?.price ? 0 : formValue.price;
-          const percent = !formValue?.percent ? 0 : formValue.percent;
-          const disCountedPrice = price - (price * percent) / 100;
-          setFormValue({ ...formValue, disCountedPrice });
-          form.setFieldsValue({ disCountedPrice: Math.floor(disCountedPrice) });
+          const priceCount = price || 0;
+          const percent = discountPercent || 0
+          const discountedPrice = priceCount - (priceCount * percent) / 100;
+          if (isModalOpen) {
+               form.setFieldValue("discountedPrice", Math.floor(discountedPrice));
+          }
+
      }
      const onSelectChange = (newSelectedRowKeys) => {
           setSelectedRowKeys(newSelectedRowKeys);
@@ -238,7 +267,6 @@ export default function Courses() {
                const { typeCourses } = unwrapResult(response);
                if (typeCourses.length) {
                     const { id } = typeCourses.find(({ name }) => name === "miễn phí");
-                    setFormValue({ ...formValue, typeCourseId: id })
                }
           } catch (e) {
                notification.error({
@@ -270,23 +298,29 @@ export default function Courses() {
      }, []);
      useEffect(() => {
           handleChangeDiscountedPrice();
-     }, [formValue?.price, formValue?.percent])
+     }, [price, discountPercent])
      const columns =
           [
                {
                     title: 'STT',
                     key: 'stt',
+                    width: "5%",
                     align: 'center',
                     render: (text, record, index) => index + 1,
                },
                {
                     title: 'Tên Khoá Học',
                     dataIndex: 'title',
+                    width: "15%",
                     key: 'title',
+                    render: (title, { slug }) => {
+                         return <Link className="hover:italic" href={`/courses/${slug}`}>{title}</Link>
+                    }
                },
                {
                     title: 'Ảnh',
                     dataIndex: 'thumb',
+                    width: "15%",
                     key: 'thumb',
                     align: 'center',
                     render: (thumb) => (
@@ -303,6 +337,11 @@ export default function Courses() {
                          </div>
 
                     )
+               },
+               {
+                    title: 'Đường dẫn',
+                    dataIndex: 'slug',
+                    key: 'slug',
                },
                {
                     title: 'Thể loại',
@@ -370,7 +409,6 @@ export default function Courses() {
                     ),
                },
           ];
-     console.log(1, formValue);
      return (
           <div>
                <Button
@@ -458,11 +496,11 @@ export default function Courses() {
                                    xs={24}
                               >
                                    <Form.Item
+                                        name='desc'
                                         className='p-4 bg-cyan-500 shadow-lg shadow-cyan-500/50 rounded-xl '
                                         label={<h3 className="text-[16px] font-medium">Nội dung:</h3>}>
                                         <TextEdit
                                              editorRef={editorRef}
-                                             value={formValue?.desc}
                                         />
                                    </Form.Item>
                               </Col>
@@ -482,7 +520,7 @@ export default function Courses() {
                                    >
                                         <UploadImage
                                              styleImage={1}
-                                             defaultImage={formValue?.thumb || urlAvatar}
+                                             defaultImage={urlAvatar}
                                              onChangeUrl={(value) => setUrlAvatar(value)}
                                         />
                                    </Form.Item>
@@ -549,14 +587,19 @@ export default function Courses() {
                                    >
                                         <Select
                                              onChange={handleChangeTypeCourse}
-
                                              options={typeCourses.length && typeCourses.map(({ id, name }) => {
                                                   return { value: id, label: name }
                                              })}
                                         />
                                    </Form.Item>
                                    {
-                                        typeCourses.find(({ id, name }) => id === formValue?.typeCourseId && name === "pro") && (
+                                        validateCourse?.typeCourseId && (
+                                             <Form.Item className="mb-0">
+                                                  <span className="text-[red]">{validateCourse?.typeCourseId}</span>
+                                             </Form.Item>)
+                                   }
+                                   {
+                                        typeCourses.find(({ id, name }) => id === typeCourseId && name === "pro") && (
                                              <>
                                                   <Form.Item
                                                        name="price"
@@ -600,7 +643,7 @@ export default function Courses() {
 
                                                   </Form.Item>
                                                   <Form.Item
-                                                       name="disCountedPrice"
+                                                       name="discountedPrice"
                                                        label=
                                                        {
                                                             <div className='flex gap-2'>
@@ -610,7 +653,7 @@ export default function Courses() {
                                                        }
                                                   >
                                                        <InputNumber
-                                                            // disabled={true}
+                                                            disabled={true}
                                                             formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                                                             parser={(value) => value.replace(/\s?/g, '').replace(/\$\s?|(,*)/g, '')}
                                                             style={{ width: '100%' }}
@@ -633,6 +676,14 @@ export default function Courses() {
                                              })}
                                         />
                                    </Form.Item>
+                                   {
+                                        validateCourse?.categoryId &&
+                                        (
+                                             <Form.Item className="mb-0">
+                                                  <span className="text-[red]">{validateCourse?.categoryId}</span>
+                                             </Form.Item>
+                                        )
+                                   }
 
 
                               </Col>

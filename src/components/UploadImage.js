@@ -90,7 +90,7 @@ export default function UploadImage({ defaultImage, onChangeUrl }) {
                     }
                </Upload>
                <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
-                    <Image alt="example" style={{ width: '100%' }} src={previewImage} />
+                    <Image width={100} objectFit='cover' height={100} alt="example" style={{ width: '100%' }} src={previewImage} />
                </Modal>
           </>
      )
