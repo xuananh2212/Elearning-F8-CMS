@@ -9,7 +9,7 @@ export default function layout({ children }) {
                <Header />
                <main className='flex min-h-[100vh]'>
                     <SideBar />
-                    <div className='mt-5 pr-10 pl-5 flex-1'>
+                    <div className='pt-3 pr-10 pl-5 flex-1'>
 
                          {
                               children

@@ -114,6 +114,7 @@ export default function Courses() {
      };
      const showEditModal = (course) => {
           setIsEdit(true);
+          console.log(course);
           editorRef.current?.setContent(course?.desc);
           setId(course?.id);
           setPrice(course?.price);
