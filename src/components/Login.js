@@ -128,9 +128,9 @@ export default function Login() {
 
                               <Form.Item >
                                    <Button loading={loading} type="primary" htmlType="submit"
-                                        className=' text-[#fff] bg-[#f05123]  py-2 px-4 h-full flex justify-center rounded-[44px] w-full cursor-pointer'
+                                        className=' text-[#fff] bg-[#2364f0]  py-2 px-4 h-full flex justify-center rounded-[44px] w-full cursor-pointer'
                                    >
-                                        Submit
+                                        Đăng Nhập
                                    </Button>
                               </Form.Item>
                          </Form>

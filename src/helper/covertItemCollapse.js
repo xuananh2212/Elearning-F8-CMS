@@ -1,34 +1,9 @@
 import { FaTrashCan } from "react-icons/fa6";
 import { Button, message, Popconfirm, Dropdown, Space } from 'antd';
 import { IoMdAdd } from "react-icons/io";
-function convertToRoman(num) {
-     const romanNumerals = {
-          M: 1000,
-          CM: 900,
-          D: 500,
-          CD: 400,
-          C: 100,
-          XC: 90,
-          L: 50,
-          XL: 40,
-          X: 10,
-          IX: 9,
-          V: 5,
-          IV: 4,
-          I: 1
-     };
-
-     let roman = '';
-
-     for (let key in romanNumerals) {
-          while (num >= romanNumerals[key]) {
-               roman += key;
-               num -= romanNumerals[key];
-          }
-     }
-
-     return roman;
-}
+import { convertToRoman } from "./convertRoman";
+import Drag from "@/components/Drag";
+import { Droppable, Draggable } from "react-beautiful-dnd";
 const items = [
      {
           label: <div onClick={(e) => { e.stopPropagation() }} >1st menu item</div>,
@@ -47,33 +22,28 @@ const items = [
           key: '3',
      },
 ];
-export const childrenCollapse = (lessons) => (
-     lessons.map(({ title, sort }, index) => (
-          <div className="mt-1 p-4 flex items-center justify-between border border-solid border-[#7a797985] rounded cursor-pointer" key={index}>
-               {`${sort}. ${title}`}
-               <Popconfirm
-                    title="Delete the task"
-                    description="Are you sure to delete this task?"
-                    onConfirm={confirm}
-                    onCancel={cancel}
-                    okText="Yes"
-                    cancelText="No"
-               >
-                    <FaTrashCan
-                         className="text-[red]"
-                         onClick={(event) => {
-                              event.stopPropagation();
-                         }}
-                    />
-               </Popconfirm>
-          </div>
-     ))
-);
-const confirm = (e) => {
-     e.stopPropagation();
-     message.success('Click on Yes');
-};
-
+// export const childrenCollapse = (lessons, topicSort) => (
+//      lessons.map(({ title, sort }, index) => (
+//           <div className="mt-1 p-4 flex items-center justify-between border border-solid border-[#7a797985] rounded cursor-pointer" key={index}>
+//                {`${topicSort}.${sort}. ${title}`}
+//                <Popconfirm
+//                     title="Delete the task"
+//                     description="Are you sure to delete this task?"
+//                     onConfirm={confirm}
+//                     onCancel={cancel}
+//                     okText="Yes"
+//                     cancelText="No"
+//                >
+//                     <FaTrashCan
+//                          className="text-[red]"
+//                          onClick={(event) => {
+//                               event.stopPropagation();
+//                          }}
+//                     />
+//                </Popconfirm>
+//           </div>
+//      ))
+// );
 const cancel = (e) => {
      e.stopPropagation();
      message.error('Click on No');
@@ -118,11 +88,42 @@ const genExtra = (id) => (
 );
 
 export const covertItemCollapse = (topics) => {
-     console.log(topics);
-     return topics.map((topic) => ({
+     return topics.map((topic, index) => ({
           key: topic?.id,
-          label: `${convertToRoman(topic?.sort)}. ${topic?.title}`,
-          children: topic.Lessons?.length > 0 ? childrenCollapse(topic.Lessons) : undefined,
+          label: (
+               <Draggable draggableId={topic?.id} index={index}>
+                    {
+                         provided => (
+                              <div
+                                   ref={provided.innerRef}
+                                   {...provided.draggableProps}
+                                   {...provided.dragHandleProps}
+                              >
+                                   <Droppable droppableId={topic?.id}>
+                                        {
+                                             provided =>
+                                             (
+                                                  <div
+                                                       ref={provided.innerRef}
+                                                       {...provided.droppableProps}
+
+                                                  >
+                                                       {convertToRoman(topic?.sort)}. {topic?.title}
+
+                                                       {provided.placeholder}
+
+                                                  </div>
+                                             )
+                                        }
+                                   </Droppable>
+                              </div>
+                         )
+                    }
+               </Draggable>
+
+
+          ),
+          children: topic.Lessons?.length > 0 ? <Drag topic={topic} lessons={topic.Lessons} topicSort={topic.sort} /> : undefined,
           extra: genExtra(topic?.id),
      }));
 }

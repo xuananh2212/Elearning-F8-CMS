@@ -15,6 +15,7 @@ export async function middleware(request) {
      const { pathname } = request.nextUrl;
      if (pathname !== '/auth/dang-nhap') {
           if (data.status === 401) {
+               console.log(1);
                return NextResponse.redirect(new URL('/auth/dang-nhap', request.url));
           }
      } else {
