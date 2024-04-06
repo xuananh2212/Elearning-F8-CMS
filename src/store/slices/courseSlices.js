@@ -3,6 +3,7 @@ import { requestGetAllCourse, requestAddCourse, requestUpdateCourse, requestDele
 const initialState = {
      loading: false,
      courses: [],
+     topicDetail: null,
      validateCourse: null,
 }
 
@@ -12,7 +13,8 @@ export const courseSlices = createSlice({
      reducers: {
           resetValidateCourse: (state, action) => {
                state.validateCourse = null;
-          }
+          },
+
      },
      extraReducers: (builder) => {
           const listRequests = [

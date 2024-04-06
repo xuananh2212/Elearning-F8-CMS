@@ -1,9 +1,8 @@
 import { FaTrashCan } from "react-icons/fa6";
 import { Button, message, Popconfirm, Dropdown, Space } from 'antd';
 import { IoMdAdd } from "react-icons/io";
-import { convertToRoman } from "./convertRoman";
+import Topic from "@/components/CustomAccordion";
 import Drag from "@/components/Drag";
-import { Droppable, Draggable } from "react-beautiful-dnd";
 const items = [
      {
           label: <div onClick={(e) => { e.stopPropagation() }} >1st menu item</div>,
@@ -91,39 +90,10 @@ export const covertItemCollapse = (topics) => {
      return topics.map((topic, index) => ({
           key: topic?.id,
           label: (
-               <Draggable draggableId={topic?.id} index={index}>
-                    {
-                         provided => (
-                              <div
-                                   ref={provided.innerRef}
-                                   {...provided.draggableProps}
-                                   {...provided.dragHandleProps}
-                              >
-                                   <Droppable droppableId={topic?.id}>
-                                        {
-                                             provided =>
-                                             (
-                                                  <div
-                                                       ref={provided.innerRef}
-                                                       {...provided.droppableProps}
-
-                                                  >
-                                                       {convertToRoman(topic?.sort)}. {topic?.title}
-
-                                                       {provided.placeholder}
-
-                                                  </div>
-                                             )
-                                        }
-                                   </Droppable>
-                              </div>
-                         )
-                    }
-               </Draggable>
-
+               <Topic topic={topic} />
 
           ),
-          children: topic.Lessons?.length > 0 ? <Drag topic={topic} lessons={topic.Lessons} topicSort={topic.sort} /> : undefined,
+          children: topic.Lessons?.length > 0 ? <Drag key={topic?.id} topic={topic} lessons={topic.Lessons} topicSort={topic.sort} /> : undefined,
           extra: genExtra(topic?.id),
      }));
 }

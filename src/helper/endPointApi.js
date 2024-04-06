@@ -8,5 +8,6 @@ export const endPointApi = {
      USERS: 'user/v1',
      COURSES: 'course/v1',
      UPLOAD_IMAGE: 'upload/v1/image',
-     DISCOUNTS: 'discount/v1'
+     DISCOUNTS: 'discount/v1',
+     TOPICS: 'topic/v1',
 }
