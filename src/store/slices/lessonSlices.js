@@ -1,25 +1,24 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { requestUpdateSortTopic } from "../middlewares/topic.middlewares";
+import { requestUpdateSortLesson, requestUpdateSortLessonDifferentTopic } from "../middlewares/lesson.middlewares";
 const initialState = {
      loading: false,
-     topicDetail: null,
-     validateTopic: null,
+     validatelesson: null,
 }
-export const topicSlices = createSlice(
+export const lessonSlices = createSlice(
      {
-          name: 'topics',
+          name: 'lessons',
           initialState,
           reducers: {
                resetValidateDiscounts: (state, action) => {
-                    state.validateTopic = null
+                    state.validatelesson = null
                },
-               setTopicDetail: (state, action) => {
-                    state.topicDetail = action.payload;
+               setlessonDetail: (state, action) => {
+                    state.lessonDetail = action.payload;
                }
           },
           extraReducers: (builder) => {
                const listRequests = [
-                    requestUpdateSortTopic
+                    requestUpdateSortLesson, requestUpdateSortLessonDifferentTopic
                ]
                listRequests.forEach((request) => {
                     builder.addCase(request.pending, (state, action) => {
@@ -29,9 +28,11 @@ export const topicSlices = createSlice(
                          state.loading = false;
                     });
                });
-               builder.addCase(requestUpdateSortTopic.fulfilled, (state, action) => {
+               builder.addCase(requestUpdateSortLesson.fulfilled, (state, action) => {
                     state.loading = false;
-                    state.topicDetail = action.payload.topics.sort((a, b) => a.sort - b.sort);
+               })
+               builder.addCase(requestUpdateSortLessonDifferentTopic.fulfilled, (state, action) => {
+                    state.loading = false;
                })
 
           }
@@ -39,4 +40,4 @@ export const topicSlices = createSlice(
      }
 )
 
-export default topicSlices.reducer;
+export default lessonSlices.reducer;

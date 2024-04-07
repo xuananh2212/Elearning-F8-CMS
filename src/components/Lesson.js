@@ -17,7 +17,8 @@ export default function Lesson({ lesson, topicSort }) {
      const dndkitLessonStyle = {
           transform: CSS.Translate.toString(transform),
           transition,
-          opacity: isDragging ? 0.5 : undefined
+          opacity: isDragging ? 0.5 : undefined,
+          border: isDragging ? '1px solid #3498db' : undefined,
      };
      return (
           <div
@@ -25,15 +26,17 @@ export default function Lesson({ lesson, topicSort }) {
                style={dndkitLessonStyle}
                key={lesson?.id}
                {...attributes}
+               className='p-4 mt-2 border-1 border-solid rounded-xl border-[#c2bebe]'
           >
                <div
                     {...listeners}
-                    className='flex gap-2 items-center justify-between p-4 mt-2 border-1 border-solid rounded-xl border-[#c2bebe]'>
+                    className='flex gap-2 items-center'
+               >
                     <Checkbox
                          isSelected={isSelected}
                          onValueChange={setIsSelected}
                     />
-                    <p>
+                    <p className='w-full'>
                          {`${topicSort}. ${lesson.sort}. ${lesson.title}`}
                     </p>
 

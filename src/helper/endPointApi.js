@@ -10,4 +10,5 @@ export const endPointApi = {
      UPLOAD_IMAGE: 'upload/v1/image',
      DISCOUNTS: 'discount/v1',
      TOPICS: 'topic/v1',
+     LESSONS: 'lesson/v1'
 }

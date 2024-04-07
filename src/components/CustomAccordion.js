@@ -23,7 +23,8 @@ export default function CustomAccordion({ topic }) {
           transform: CSS.Translate.toString(transform),
           transition,
           // khi kéo opacity sẽ bị mờ 0.5
-          opacity: isDragging ? 0.5 : undefined
+          opacity: isDragging ? 0.5 : undefined,
+          border: isDragging ? '1px solid #3498db' : undefined,
      };
      const handleClickAccordion = () => {
           setIsOpenAccordion(!isOpenAccordion);
@@ -41,7 +42,7 @@ export default function CustomAccordion({ topic }) {
           >
                <div
                     onClick={handleClickAccordion}
-                    className={`flex flex-shrink-0 gap-4 items-center`}>
+                    className={`flex w-[100%] flex-shrink-0 gap-4 items-center`}>
                     <div>
                          <IoCaretForward className={`text-[20x] transition duration-200  ease-out ${isOpenAccordion ? "rotate-90" : "rotate-0"}`} />
                     </div>
@@ -84,7 +85,7 @@ export default function CustomAccordion({ topic }) {
                     </div>
                </div>
                <div
-                    className={`transition duration-300 ease-in-out text-slate-600 text-sm ${isOpenAccordion ? 'block' : 'hidden'
+                    className={`transition duration-300 w-[80%] ease-in-out text-slate-600 text-sm ${isOpenAccordion ? 'block' : 'hidden'
                          }`}
                >
                     <SortableContext
