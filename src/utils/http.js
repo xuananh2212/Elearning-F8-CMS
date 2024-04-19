@@ -7,6 +7,6 @@ export const config = (props) => {
      }
 };
 export const request = axios.create({
-     baseURL: process.env.NEXT_PUBLIC_API
-});
+     baseURL: process.env.NEXT_PUBLIC_API,
 
+});

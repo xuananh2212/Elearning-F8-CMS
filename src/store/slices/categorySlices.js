@@ -10,7 +10,6 @@ const initialState = {
      validateCategory: null,
      categoriesTreeData: []
 }
-
 export const categorySlices = createSlice({
      name: 'categories',
      initialState,

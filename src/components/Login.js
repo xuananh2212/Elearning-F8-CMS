@@ -47,6 +47,20 @@ export default function Login() {
      const onFinishFailed = (errorInfo) => {
           console.log('Failed:', errorInfo);
      };
+     const handleClickGoogle = async () => {
+          console.log(11);
+          try {
+               window.open(`http://localhost:3000/api/auth/v1/google/callback`, "_self", "width=800,height=500");
+
+               const response = await fetch('http://localhost:3000/api/auth/v1/google/callback');
+               const data = await response.json();
+               console.log(data);
+
+          } catch (e) {
+
+          }
+
+     }
      useEffect(() => {
           if (user) {
                var date = new Date();
@@ -135,6 +149,7 @@ export default function Login() {
                               </Form.Item>
                          </Form>
                     </div>
+                    <button onClick={handleClickGoogle}>google</button>
                </div>
           </div>
      )

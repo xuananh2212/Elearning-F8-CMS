@@ -259,7 +259,6 @@ export default function BoardContent({ course }) {
                               : <Lesson
                                    lesson={activeDragItemData}
                                    topicSort={handleFindSortTopic(activeDragItemData?.topic_id)}
-
                               />
 
                     }

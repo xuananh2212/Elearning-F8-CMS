@@ -7,6 +7,7 @@ export const requestLogin = createAsyncThunk('auth/login', async (props, { rejec
           const res = await request.post(`${LOGIN}`, props);
           return res.data;
      } catch (e) {
+          console.log(e);
           return rejectWithValue(e?.response?.data);
 
      }
