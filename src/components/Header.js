@@ -1,7 +1,7 @@
-import Link from "next/link";
-import Image from "next/image";
+import Action from "@/components/Action";
 import Search from "@/components/Search";
-import Action from "@/components/Action"
+import Image from "next/image";
+import Link from "next/link";
 export default function Header() {
      return (
           <div className='h-[66px] flex justify-between bg-[#fff] items-center px-7 border-b-[1px] border-solid border-[#e8ebed] sticky top-0 right-0 z-20'>
@@ -13,12 +13,12 @@ export default function Header() {
                     >
                          <Image
                               className='rounded-lg'
-                              src="http://res.cloudinary.com/daxftrleb/image/upload/v1709733165/e-learning/xpasxyscc4jh0tz7rlzu.png"
+                              src="/images/logo.png"
                               width={40}
                               height={40}
                               alt="logo"
                          />
-                         <span className="text-[#242424] font-black text-l">F8 Admin</span>
+                         <span className="text-[#242424] font-black text-l">KMA Admin</span>
                     </Link>
                </div>
                <Search />

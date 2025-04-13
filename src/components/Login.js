@@ -1,12 +1,12 @@
 "use client"
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { Button, Checkbox, Form, Input, notification } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
-import { unwrapResult } from '@reduxjs/toolkit';
 import { requestLogin } from '@/store/middlewares/auth.middewares';
-import { useRouter } from 'next/navigation';
 import { userSlices } from '@/store/slices/userSlices';
+import { unwrapResult } from '@reduxjs/toolkit';
+import { Button, Checkbox, Form, Input, notification } from 'antd';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 const { resetValidateLogin } = userSlices.actions;
 export default function Login() {
      const dispatch = useDispatch();
@@ -72,23 +72,15 @@ export default function Login() {
           }
      }, [user]);
      return (
-          <div className='w-full py-10  flex justify-center items-center h-screen'>
-               <div className="w-1/2 h-screen hidden lg:block">
-                    <Image
-                         src="http://res.cloudinary.com/daxftrleb/image/upload/v1709734684/e-learning/ulecltfdbt5ivcpww8bk.jpg"
-                         width={1000}
-                         height={1000}
-                         alt="Placeholder Image"
-                         className="object-cover w-full h-full object-right-top" />
-               </div>
+          <div className='w-full py-10 flex justify-center items-center h-screen'>
                <div className='lg:p-12 md:p-52 sm:20 p-8 w-full lg:w-1/2 flex items-center justify-center'>
                     <div className='w-[80%] p-6 shadow-lg shadow-cyan-500/50 rounded-lg'>
                          <div className='flex items-center justify-center'>
                               <Image
                                    className='rounded-lg'
-                                   src="http://res.cloudinary.com/daxftrleb/image/upload/v1709733165/e-learning/xpasxyscc4jh0tz7rlzu.png"
-                                   width={40}
-                                   height={40}
+                                   src="/images/logo.png"
+                                   width={100}
+                                   height={100}
                                    alt="logo"
                               />
                          </div>

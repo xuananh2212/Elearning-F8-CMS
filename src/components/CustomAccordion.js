@@ -1,12 +1,11 @@
-import React from 'react'
 import { convertToRoman } from "@/helper/convertRoman";
-import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Tooltip, Button, Checkbox, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react';
+import { Button, Checkbox, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Tooltip } from '@nextui-org/react';
 import { useState } from 'react';
 import { IoMdAdd } from "react-icons/io";
-import { MdDelete } from "react-icons/md";
 import { IoCaretForward } from "react-icons/io5";
+import { MdDelete } from "react-icons/md";
 import Lesson from './Lesson';
 export default function CustomAccordion({ topic }) {
      const [isOpenAccordion, setIsOpenAccordion] = useState(false);
@@ -68,7 +67,7 @@ export default function CustomAccordion({ topic }) {
                               <DropdownMenu aria-label="Static Actions">
                                    <DropdownItem key="create-video">Tạo bài học Dạng Video</DropdownItem>
                                    <DropdownItem key="create-document">Tạo bài học dạng tài liệu</DropdownItem>
-                                   <DropdownItem key="create-quiz">tạo bài học dạng trắc nghiệm</DropdownItem>
+                                   <DropdownItem key="create-quiz">Tạo bài học dạng trắc nghiệm</DropdownItem>
                               </DropdownMenu>
                          </Dropdown>
 
