@@ -3,31 +3,31 @@ import TextEdit from "@/components/TextEdit";
 import UploadImage from "@/components/UploadImage";
 import { requestGetCategories } from "@/store/middlewares/category.middewares";
 import {
-     requestAddCourse,
-     requestDeleteCourse,
-     requestDeleteManyCourse,
-     requestGetAllCourse,
-     requestUpdateCourse,
+  requestAddCourse,
+  requestDeleteCourse,
+  requestDeleteManyCourse,
+  requestGetAllCourse,
+  requestUpdateCourse,
 } from "@/store/middlewares/course.middewares";
 import { requestGetDiscounts } from "@/store/middlewares/discount.middewares";
 import { requestGetAllTypeCourse } from "@/store/middlewares/typeCourse.middewares";
 import { courseSlices } from "@/store/slices/courseSlices";
 import { unwrapResult } from "@reduxjs/toolkit";
 import {
-     Button,
-     Col,
-     Form,
-     Input,
-     InputNumber,
-     Modal,
-     notification,
-     Popconfirm,
-     Row,
-     Select,
-     Space,
-     Table,
-     Tag,
-     Tooltip
+  Button,
+  Col,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  notification,
+  Popconfirm,
+  Row,
+  Select,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
 } from "antd";
 import { useForm } from "antd/es/form/Form";
 import Image from "next/image";
@@ -94,15 +94,8 @@ export default function Courses() {
       setPrice(null);
       setIsModalOpen(false);
       form.resetFields(null);
-      notification.success({
-        message,
-        duration: 1.0,
-      });
     } catch (e) {
-      notification.error({
-        message: e.message,
-        duration: 1.0,
-      });
+      console.error(e);
     }
   };
   const handleAddCourse = async () => {
@@ -130,10 +123,6 @@ export default function Courses() {
       setConfirmLoading(false);
     } catch (e) {
       console.log(e);
-      notification.error({
-        message: e?.message,
-        duration: 1.0,
-      });
       setConfirmLoading(false);
     }
   };
@@ -166,12 +155,7 @@ export default function Courses() {
           duration: 1.0,
         });
         setSelectedRowKeys([]);
-      } catch (e) {
-        notification.error({
-          message: e.message,
-          duration: 1.0,
-        });
-      }
+      } catch (e) {}
     }
   };
   const handleChangeDiscount = (value) => {
@@ -213,12 +197,7 @@ export default function Courses() {
         message: "Xóa thành công",
         duration: 1.0,
       });
-    } catch (e) {
-      notification.error({
-        message: e.message,
-        duration: 1.0,
-      });
-    }
+    } catch (e) {}
   };
   const rowSelection = {
     selectedRowKeys,
@@ -265,23 +244,13 @@ export default function Courses() {
     try {
       const response = await dispatch(requestGetCategories());
       unwrapResult(response);
-    } catch (e) {
-      notification.error({
-        message: e?.message,
-        duration: 1.0,
-      });
-    }
+    } catch (e) {}
   };
   const requestLoadCourses = async () => {
     try {
       const response = await dispatch(requestGetAllCourse());
       unwrapResult(response);
-    } catch (e) {
-      notification.error({
-        message: e?.message,
-        duration: 1.0,
-      });
-    }
+    } catch (e) {}
   };
   const requestLoadTypeCourse = async () => {
     try {
@@ -290,23 +259,13 @@ export default function Courses() {
       if (typeCourses.length) {
         const { id } = typeCourses.find(({ name }) => name === "miễn phí");
       }
-    } catch (e) {
-      notification.error({
-        message: e?.message,
-        duration: 1.0,
-      });
-    }
+    } catch (e) {}
   };
   const requestLoadDiscounts = async () => {
     try {
       const response = await dispatch(requestGetDiscounts());
       unwrapResult(response);
-    } catch (e) {
-      notification.error({
-        message: e?.message,
-        duration: 1.0,
-      });
-    }
+    } catch (e) {}
   };
   useEffect(() => {
     if (!categories.length) {
