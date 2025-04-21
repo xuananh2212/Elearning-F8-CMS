@@ -51,6 +51,7 @@ const UploadFile = ({
   content = "Tải file",
   fileType = "image", // Default file type is image
   type,
+  ...props
 }) => {
   const beforeUploadHandler = (file) => {
     return false; // Prevent default upload behavior
@@ -115,6 +116,7 @@ const UploadFile = ({
       className={clsx(readonly ? "pointer-events-none" : "")}
       name={nameFile}
       label={label}
+      rules={props?.rules}
     >
       <Dragger
         beforeUpload={beforeUploadHandler}

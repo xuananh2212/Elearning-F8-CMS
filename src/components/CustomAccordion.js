@@ -117,6 +117,7 @@ export default function CustomAccordion({ topic, setCurrentAction }) {
         >
           {topic.Lessons.map((lesson, index) => (
             <Lesson
+              setCurrentAction={setCurrentAction}
               topicSort={topic.sort}
               key={lesson.id}
               index={index}
