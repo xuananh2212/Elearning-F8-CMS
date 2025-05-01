@@ -2,7 +2,7 @@ import TextEdit from "@/components/TextEdit";
 import LessonService from "@/services/Lessons";
 import UploadService from "@/services/Upload";
 import { Button, Form, Input } from "antd";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import UploadFile from "../upload-file/UploadFile";
@@ -76,49 +76,61 @@ const AddEditVideos = ({ currentAction, isHiddenVideos }) => {
       console.log(e);
     }
   };
+  useEffect(() => {
+    form.setFieldsValue({
+      title: currentAction?.lessonType?.title,
+    });
+  }, [currentAction]);
   return (
-    <Form
-      className="mt-2 p-4 rounded-lg"
-      layout="vertical"
-      name="videos"
-      form={form}
-      onFinish={onFinish}
-      initialValues={{
-        title: currentAction?.title,
-      }}
-    >
-      <Form.Item
-        rules={[{ required: true, message: "Vui lòng nhập tên bài học!" }]}
-        name="title"
-        className="p-4 bg-cyan-500 shadow-lg shadow-cyan-500/50 rounded-xl"
-        label={<h3 className="text-[16px] font-medium">Tên bài học:</h3>}
+    <div>
+      <h1 className="mb-3 font-semibold">
+        {isHiddenVideos ? "Dạng bài học tài liệu" : "Dạng bài học Video"}
+      </h1>
+      <Form
+        className="mt-2 p-4 rounded-lg"
+        layout="vertical"
+        name="videos"
+        form={form}
+        onFinish={onFinish}
+        initialValues={{
+          title: currentAction?.title,
+        }}
       >
-        <Input />
-      </Form.Item>
-      {!isHiddenVideos && (
-        <UploadFile
-          rules={[{ required: true, message: "Vui lòng chọn video tải lên!" }]}
-          type={"add"}
-          form={form}
-          nameUrl="videoUrl"
-          nameFile="fileVideoFile"
-          label="Tải video"
-          fileType="video"
-        />
-      )}
-      <Form.Item
-        name="desc"
-        className="p-4 bg-cyan-500 shadow-lg shadow-cyan-500/50 rounded-xl"
-        label={<h3 className="text-[16px] font-medium">Nội dung:</h3>}
-      >
-        <TextEdit editorRef={editorRef} />
-      </Form.Item>
-      <div className="ml-auto">
-        <Button type="primary" className="bg-[#1473e6]" htmlType="submit">
-          Tạo
-        </Button>
-      </div>
-    </Form>
+        <Form.Item
+          rules={[{ required: true, message: "Vui lòng nhập tên bài học!" }]}
+          name="title"
+          className="p-4 bg-cyan-500 shadow-lg shadow-cyan-500/50 rounded-xl"
+          label={<h3 className="text-[16px] font-medium">Tên bài học:</h3>}
+        >
+          <Input />
+        </Form.Item>
+        {!isHiddenVideos && (
+          <UploadFile
+            rules={[
+              { required: true, message: "Vui lòng chọn video tải lên!" },
+            ]}
+            type={"add"}
+            form={form}
+            nameUrl="videoUrl"
+            nameFile="fileVideoFile"
+            label="Tải video"
+            fileType="video"
+          />
+        )}
+        <Form.Item
+          name="desc"
+          className="p-4 bg-cyan-500 shadow-lg shadow-cyan-500/50 rounded-xl"
+          label={<h3 className="text-[16px] font-medium">Nội dung:</h3>}
+        >
+          <TextEdit editorRef={editorRef} />
+        </Form.Item>
+        <div className="ml-auto">
+          <Button type="primary" className="bg-[#1473e6]" htmlType="submit">
+            Tạo
+          </Button>
+        </div>
+      </Form>
+    </div>
   );
 };
 

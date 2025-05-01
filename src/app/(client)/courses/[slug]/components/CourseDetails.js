@@ -75,7 +75,7 @@ const CourseDetails = ({ slug }) => {
             <BoardContent course={course} setCurrentAction={setCurrentAction} />
           </div>
         </div>
-        <div className="p-2">
+        <div className="p-2 flex-1">
           {<RenderLessons currentAction={currentAction} />}
         </div>
         <AddEditTopic

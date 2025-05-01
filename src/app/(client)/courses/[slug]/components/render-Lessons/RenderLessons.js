@@ -7,6 +7,7 @@ const {
 const { default: AddEditVideos } = require("../lesson-videos/AddEditVideos");
 
 const RenderLessons = ({ currentAction }) => {
+  console.log("currentAction", currentAction);
   switch (currentAction?.key) {
     case "1":
       return <AddEditVideos currentAction={currentAction} />;
