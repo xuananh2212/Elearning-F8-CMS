@@ -9,7 +9,13 @@ export class LessonService {
     return axiosInstance.post("lessonVideo/v1", params);
   }
   static addLessonDocument(params) {
-    return axiosInstance.post("/lessondocument/v1", params);
+    return axiosInstance.post("lessondocument/v1", params);
+  }
+  static addLessonQuiz(params) {
+    return axiosInstance.post("lessonQuiz/v1", params);
+  }
+  static addQuestionsBatch(params) {
+    return axiosInstance.post("lessonQuiz/v1/question/many", params);
   }
 }
 
