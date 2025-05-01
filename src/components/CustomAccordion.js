@@ -44,7 +44,7 @@ export default function CustomAccordion({ topic, setCurrentAction }) {
     try {
       setCurrentAction({
         key: type,
-        ...topic,
+        id: topic.id,
       });
     } catch (err) {
       console.error(err);

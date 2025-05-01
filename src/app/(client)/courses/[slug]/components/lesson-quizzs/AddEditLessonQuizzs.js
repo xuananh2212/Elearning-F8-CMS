@@ -1,12 +1,15 @@
 import LessonService from "@/services/Lessons";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Card, Form, Input, Radio, Space } from "antd";
+import { useEffect } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 
 const AddEditLessonQuizzs = ({ currentAction }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
+
+  const isEditMode = !!currentAction?.lessonType?.LessonQuiz?.Questions?.length;
 
   const { mutateAsync: mutateAddLessonAsync } = useMutation({
     mutationFn: async (data) => {
@@ -29,47 +32,93 @@ const AddEditLessonQuizzs = ({ currentAction }) => {
     },
     onSuccess: async () => {
       toast.success(`Thêm bộ đề trắc nghiệm thành công`);
-      await queryClient.invalidateQueries({
-        queryKey: ["COURSE"],
-      });
+      await queryClient.invalidateQueries({ queryKey: ["COURSE"] });
     },
   });
 
+  const { mutateAsync: mutateUpdateQuestionsBatchAsync } = useMutation({
+    mutationFn: async (data) => {
+      const response = await LessonService.updateQuestionsBatch(data);
+      return response?.data;
+    },
+    onSuccess: async () => {
+      toast.success(`Cập nhật bộ đề trắc nghiệm thành công`);
+      await queryClient.invalidateQueries({ queryKey: ["COURSE"] });
+    },
+  });
+
+  useEffect(() => {
+    if (isEditMode) {
+      const initialQuestions =
+        currentAction.lessonType.LessonQuiz.Questions.map((q) => ({
+          content: q.question,
+          explain: q.explain,
+          correctAnswerIndex: q.Answers.findIndex((a) => a.result),
+          answers: q.Answers.map((a) => a.name),
+        }));
+
+      form.setFieldsValue({
+        lessonTitle: currentAction.lessonType.title,
+        questions: initialQuestions,
+      });
+    } else {
+      form.setFieldsValue({
+        lessonTitle: [],
+        questions: [],
+      });
+    }
+  }, [currentAction, isEditMode, form]);
+
   const handleFinish = async (values) => {
     try {
-      // 1️⃣ Tạo Lesson
-      const lessonData = await mutateAddLessonAsync({
-        topicId: currentAction?.id,
-        title: values.lessonTitle || "Bài học Quiz",
-      });
+      if (isEditMode) {
+        const lessonQuizId = currentAction.lessonType.LessonQuiz.id;
 
-      const lessonId = lessonData?.lesson?.id;
+        const formattedQuestions = values.questions.map((q, index) => ({
+          id: currentAction.lessonType.LessonQuiz.Questions[index]?.id,
+          question: q.content,
+          explain: q.explain || "",
+          answers: q.answers.map((a, i) => ({
+            id: currentAction.lessonType.LessonQuiz.Questions[index]?.Answers[i]
+              ?.id,
+            name: a,
+            result: i === q.correctAnswerIndex,
+          })),
+        }));
 
-      // 2️⃣ Tạo LessonQuiz
-      const lessonQuizData = await mutateAddLessonQuizAsync({
-        lessonId,
-      });
+        await mutateUpdateQuestionsBatchAsync({
+          lessonQuizId,
+          questions: formattedQuestions,
+        });
+      } else {
+        const lessonData = await mutateAddLessonAsync({
+          topicId: currentAction?.id,
+          title: values.lessonTitle || "Bài học Quiz",
+        });
 
-      const lessonQuizId = lessonQuizData?.lessonQuiz?.id;
+        const lessonId = lessonData?.lesson?.id;
 
-      // 3️⃣ Chuẩn bị dữ liệu câu hỏi
-      const formattedQuestions = values.questions.map((q) => ({
-        question: q.content,
-        explain: q.explain || "",
-        answers: q.answers.map((a, i) => ({
-          name: a,
-          result: i === q.correctAnswerIndex,
-        })),
-      }));
+        const lessonQuizData = await mutateAddLessonQuizAsync({ lessonId });
 
-      // 4️⃣ Gửi API tạo batch câu hỏi
-      await mutateAddQuestionsBatchAsync({
-        lessonQuizId,
-        questions: formattedQuestions,
-      });
+        const lessonQuizId = lessonQuizData?.lessonQuiz?.id;
+
+        const formattedQuestions = values.questions.map((q) => ({
+          question: q.content,
+          explain: q.explain || "",
+          answers: q.answers.map((a, i) => ({
+            name: a,
+            result: i === q.correctAnswerIndex,
+          })),
+        }));
+
+        await mutateAddQuestionsBatchAsync({
+          lessonQuizId,
+          questions: formattedQuestions,
+        });
+      }
     } catch (e) {
       console.error(e);
-      toast.error("Đã xảy ra lỗi khi tạo bộ đề");
+      toast.error("Đã xảy ra lỗi khi xử lý bộ đề");
     }
   };
 
@@ -174,7 +223,7 @@ const AddEditLessonQuizzs = ({ currentAction }) => {
 
       <Form.Item>
         <Button type="primary" htmlType="submit">
-          Tạo bộ đề
+          {isEditMode ? "Cập nhật bộ đề" : "Tạo bộ đề"}
         </Button>
       </Form.Item>
     </Form>
