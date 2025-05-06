@@ -160,7 +160,7 @@ export default function Login() {
             </Form.Item>
           </Form>
         </div>
-        <button onClick={handleClickGoogle}>google</button>
+        {/* <button onClick={handleClickGoogle}>google</button> */}
       </div>
     </div>
   );
