@@ -20,6 +20,7 @@ import {
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const { TextArea } = Input;
 
@@ -46,6 +47,13 @@ export default function QuestionSetsPage() {
       const res = await axiosInstance.get(
         "/question-set/v1/question-sets-with-questions"
       );
+      return res.data;
+    },
+  });
+  const { data: teachers, isFetching } = useQuery({
+    queryKey: "teachers",
+    queryFn: async () => {
+      const res = await axiosInstance.get("/teachers/v1");
       return res.data;
     },
   });
@@ -79,6 +87,7 @@ export default function QuestionSetsPage() {
       ]);
       setUrlAvatar("");
       setModalOpen(false);
+      toast.success("Thêm bộ đề thành công");
     },
   });
 
@@ -113,6 +122,7 @@ export default function QuestionSetsPage() {
       duration: Number(values.duration),
       totalQuestions: Number(values.totalQuestions),
       categoryId: values.categoryId,
+      teacherId: values?.teacherId,
       questions: questionInputs.map((q) => ({
         question: q.question,
         explain: q.explain,
@@ -127,6 +137,8 @@ export default function QuestionSetsPage() {
   const columns = [
     { title: "Tiêu đề", dataIndex: "title" },
     { title: "Mô tả", dataIndex: "description" },
+    { title: "Thể loại", dataIndex: "category_name" },
+    { title: "Giáo viên", dataIndex: "teacher_name" },
     { title: "Thời lượng (phút)", dataIndex: "duration" },
     { title: "Tổng số câu hỏi", dataIndex: "total_questions" },
   ];
@@ -147,7 +159,13 @@ export default function QuestionSetsPage() {
       >
         <Table
           columns={columns}
-          dataSource={data || []}
+          dataSource={
+            data?.map((item) => ({
+              ...item,
+              category_name: item?.Category?.name,
+              teacher_name: item?.User?.name,
+            })) || []
+          }
           rowKey="id"
           loading={isLoading}
         />
@@ -183,6 +201,14 @@ export default function QuestionSetsPage() {
               <Form.Item name="categoryId" label="Danh mục">
                 <Select
                   options={categories.map(({ id, name }) => ({
+                    value: id,
+                    label: name,
+                  }))}
+                />
+              </Form.Item>
+              <Form.Item name="teacherId" label="Giáo viên">
+                <Select
+                  options={teachers?.map(({ id, name }) => ({
                     value: id,
                     label: name,
                   }))}

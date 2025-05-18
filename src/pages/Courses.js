@@ -1,6 +1,7 @@
 "use client";
 import TextEdit from "@/components/TextEdit";
 import UploadImage from "@/components/UploadImage";
+import { axiosInstance } from "@/configs/axios.config";
 import { requestGetCategories } from "@/store/middlewares/category.middewares";
 import {
   requestAddCourse,
@@ -36,6 +37,7 @@ import { useEffect, useRef, useState } from "react";
 import { IoMdAdd } from "react-icons/io";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { RiDeleteBin2Fill } from "react-icons/ri";
+import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 const { resetValidateCourse } = courseSlices.actions;
 const thumbDefault =
@@ -59,6 +61,13 @@ export default function Courses() {
   const [price, setPrice] = useState("");
   const [discountPercent, setDiscountPercent] = useState("");
   const loading = useSelector((state) => state.category.loading);
+  const { data: teachers, isFetching } = useQuery({
+    queryKey: "teachers",
+    queryFn: async () => {
+      const res = await axiosInstance.get("/teachers/v1");
+      return res.data;
+    },
+  });
   const showCreateModal = () => {
     form.resetFields();
     editorRef.current?.setContent("");
@@ -669,6 +678,20 @@ export default function Courses() {
                   options={
                     categories &&
                     categories.map(({ id, name }) => {
+                      return { value: id, label: name };
+                    })
+                  }
+                />
+              </Form.Item>
+              <Form.Item
+                name="teacherId"
+                label={<h3 className="text-[16px] font-medium">Giáo viên:</h3>}
+              >
+                <Select
+                  onChange={handleChangeCategory}
+                  options={
+                    teachers &&
+                    teachers.map(({ id, name }) => {
                       return { value: id, label: name };
                     })
                   }

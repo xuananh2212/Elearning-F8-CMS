@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BiSolidDiscount } from "react-icons/bi";
 import { BsFillQuestionSquareFill } from "react-icons/bs";
 import { FaUserAlt } from "react-icons/fa";
 import { FaBookOpen, FaFile } from "react-icons/fa6";
@@ -34,11 +33,11 @@ const menu = [
     path: "/question-set",
     icon: <BsFillQuestionSquareFill className="text-[20px] text-[#404040]" />,
   },
-  {
-    title: "Khuyến mại",
-    path: "/discounts",
-    icon: <BiSolidDiscount className="text-[20px] text-[#404040]" />,
-  },
+  // {
+  //   title: "Khuyến mại",
+  //   path: "/discounts",
+  //   icon: <BiSolidDiscount className="text-[20px] text-[#404040]" />,
+  // },
   {
     title: "Khoá học",
     path: "/courses",
