@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 const { resetValidateLogin } = userSlices.actions;
 export default function Login() {
   const dispatch = useDispatch();
@@ -46,24 +47,30 @@ export default function Login() {
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
-  const handleClickGoogle = async () => {
-    console.log(11);
-    try {
-      window.open(
-        `http://localhost:3000/api/auth/v1/google/callback`,
-        "_self",
-        "width=800,height=500"
-      );
+  // const handleClickGoogle = async () => {
+  //   console.log(11);
+  //   try {
+  //     window.open(
+  //       `http://localhost:3000/api/auth/v1/google/callback`,
+  //       "_self",
+  //       "width=800,height=500"
+  //     );
 
-      const response = await fetch(
-        "http://localhost:3000/api/auth/v1/google/callback"
-      );
-      const data = await response.json();
-      console.log(data);
-    } catch (e) {}
-  };
+  //     const response = await fetch(
+  //       "http://localhost:3000/api/auth/v1/google/callback"
+  //     );
+  //     const data = await response.json();
+  //     console.log(data);
+  //   } catch (e) {}
+  // };
   useEffect(() => {
     if (user) {
+      if (![1, 2].includes(user.role)) {
+        toast.error("Bạn không có quyền truy cập hệ thống!");
+        dispatch(resetValidateLogin());
+        return;
+      }
+
       var date = new Date();
       date.setTime(date.getTime() + 7 * 24 * 60 * 60 * 1000);
       var expires = "; expires=" + date.toUTCString();
@@ -73,6 +80,7 @@ export default function Login() {
       router.push("/");
     }
   }, [user]);
+
   return (
     <div className="w-full py-10 flex justify-center items-center h-screen">
       <div className="lg:p-12 md:p-52 sm:20 p-8 w-full lg:w-1/2 flex items-center justify-center">
