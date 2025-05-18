@@ -1,11 +1,11 @@
-import Users from "@/pages/Users";
+import Teachers from "./components/TeacherPage";
 export default function page() {
   return (
     <>
       <h1 className="text-[#242424] text-[28px] font-black">
         Quản lý giáo viên
       </h1>
-      <Users />
+      <Teachers />
     </>
   );
 }
