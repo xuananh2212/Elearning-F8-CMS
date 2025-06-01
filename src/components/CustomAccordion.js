@@ -1,4 +1,5 @@
 import { convertToRoman } from "@/helper/convertRoman";
+import TopicService from "@/services/Topics";
 import {
   SortableContext,
   useSortable,
@@ -7,20 +8,34 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   Button,
-  Checkbox,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Tooltip,
 } from "@nextui-org/react";
+import { Popconfirm } from "antd";
 import { useState } from "react";
 import { IoMdAdd } from "react-icons/io";
 import { IoCaretForward } from "react-icons/io5";
 import { MdDelete } from "react-icons/md";
+import { useMutation, useQueryClient } from "react-query";
+import { toast } from "react-toastify";
 import Lesson from "./Lesson";
 export default function CustomAccordion({ topic, setCurrentAction }) {
   const [isOpenAccordion, setIsOpenAccordion] = useState(false);
+  const queryClient = useQueryClient();
+  const { mutateAsync } = useMutation({
+    mutationFn: async (id) => {
+      return await TopicService.deleteTopic(id);
+    },
+    onSuccess: () => {
+      toast.success("Xóa Chương học thành công");
+      setCurrentAction(null);
+      queryClient.invalidateQueries({
+        queryKey: ["COURSE"],
+      });
+    },
+  });
   const [isSelected, setIsSelected] = useState(false);
   const {
     attributes,
@@ -75,7 +90,6 @@ export default function CustomAccordion({ topic, setCurrentAction }) {
             }`}
           />
         </div>
-        <Checkbox isSelected={isSelected} onValueChange={setIsSelected} />
         <p className="w-full">
           {`${convertToRoman(topic?.sort)}. ${topic?.title}`}
         </p>
@@ -96,14 +110,24 @@ export default function CustomAccordion({ topic, setCurrentAction }) {
               <DropdownItem key="3">Tạo bài học dạng trắc nghiệm</DropdownItem>
             </DropdownMenu>
           </Dropdown>
-
-          <Tooltip color="danger" content="Xoá chương học">
+          <Popconfirm
+            title="Bạn có chắc chắn muốn xóa chương học này không?"
+            description="Hành động này sẽ không thể hoàn tác."
+            onConfirm={async () => {
+              try {
+                await mutateAsync(topic?.id);
+              } catch (e) {}
+            }}
+            onCancel={() => console.log("cancel")}
+            okText="Có"
+            cancelText="Không"
+          >
             <Button>
               <span className="text-lg text-danger cursor-pointer active:opacity-50">
                 <MdDelete className="text-[20px]" />
               </span>
             </Button>
-          </Tooltip>
+          </Popconfirm>
         </div>
       </div>
       <div

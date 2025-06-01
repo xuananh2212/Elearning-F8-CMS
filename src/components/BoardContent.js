@@ -53,7 +53,6 @@ export default function BoardContent({ course, setCurrentAction }) {
     const overLessonIndex = overTopic?.Lessons?.findIndex(
       (lesson) => lesson.id === overLessonId
     );
-    console.log("overLessonIndex:", overLessonIndex);
     let newLessonIndex;
     const isBelowOverItem =
       active.rect.current.translated &&
@@ -63,9 +62,6 @@ export default function BoardContent({ course, setCurrentAction }) {
       overLessonIndex >= 0
         ? overLessonIndex + modifier
         : overTopic?.Lessons?.length + 1;
-    console.log("isBelowOverItem:", isBelowOverItem);
-    console.log("modifier:", modifier);
-    console.log("newLessonIndex:", newLessonIndex);
     // clone mảng mới
     const nextTopics = cloneDeep(topicDetail);
     const nextActiveTopic = nextTopics.find(
@@ -79,7 +75,6 @@ export default function BoardContent({ course, setCurrentAction }) {
       nextActiveTopic.Lessons = nextActiveTopic.Lessons.map(
         (lesson, index) => ({ ...lesson, sort: index + 1 })
       );
-      console.log("nextActiveTopic:", nextActiveTopic);
     }
     if (nextOverTopic) {
       // kiểm tra xem card đang kéo nó tồn tại chưa , nếu tồn tại thì xoá nó trước;
@@ -99,7 +94,6 @@ export default function BoardContent({ course, setCurrentAction }) {
         ...lesson,
         sort: index + 1,
       }));
-      console.log("nextOverTopic:", nextOverTopic);
     }
     return { nextTopics, newLessonIndex, nextOverTopicId: nextOverTopic.id };
   };
@@ -125,7 +119,6 @@ export default function BoardContent({ course, setCurrentAction }) {
     }),
   };
   const handOnDragStart = async (result) => {
-    console.log("handOnDragStart", result);
     setActiveDragItemId(result?.active?.id);
     setActiveDragItemType(
       result?.active?.data?.current?.topic_id
@@ -165,9 +158,6 @@ export default function BoardContent({ course, setCurrentAction }) {
       );
       dispatch(setTopicDetail(nextTopics));
     }
-    // console.log('activeTopic:', activeTopic);
-    // console.log('overTopic:', overTopic);
-    // console.log('handOnDragOver:', result);
   };
   const handOnDragEnd = async (result) => {
     const { active, over } = result;
@@ -216,10 +206,6 @@ export default function BoardContent({ course, setCurrentAction }) {
           const newLessonIndex = oldTopicWhenDraggingLesson?.Lessons?.findIndex(
             ({ id }) => id === overLessonId
           );
-          console.log("oldLessonIndex:", oldLessonIndex);
-          console.log("newLessonIndex:", newLessonIndex);
-          console.log("activeDraggingLessonId:", activeDraggingLessonId);
-          console.log("overLessonId:", overLessonId);
 
           const nextTopics = cloneDeep(topicDetail);
           let dndLessons = arrayMove(
@@ -231,20 +217,16 @@ export default function BoardContent({ course, setCurrentAction }) {
             ...dndLesson,
             sort: index + 1,
           }));
-          console.log("dndLessons:", dndLessons);
           const topic = nextTopics.find(
             ({ id }) => id === oldTopicWhenDraggingLesson?.id
           );
           topic.Lessons = dndLessons;
           await dispatch(setTopicDetail(nextTopics));
-          console.log("hành động kéo thả lesson giữa 2 topic giống nhau");
           const response = await dispatch(
             requestUpdateSortLesson({ lessons: dndLessons })
           );
           unwrapResult(response);
-        } catch (e) {
-          console.log(e.message);
-        }
+        } catch (e) {}
       }
     }
     // xử lý kéo thả chương học
@@ -257,9 +239,6 @@ export default function BoardContent({ course, setCurrentAction }) {
           ({ id }) => id === over?.id
         );
         let dndTopics = arrayMove(topicDetail, oldTopicIndex, newTopicIndex);
-        console.log("oldTopicIndex", oldTopicIndex);
-        console.log("newTopicIndex", newTopicIndex);
-        console.log("dndTopics", dndTopics);
         dndTopics = dndTopics.map((dndTopic, index) => ({
           ...dndTopic,
           sort: index + 1,
@@ -295,14 +274,15 @@ export default function BoardContent({ course, setCurrentAction }) {
         strategy={verticalListSortingStrategy}
       >
         <div>
-          {topicDetail?.length &&
-            topicDetail?.map((topic) => (
-              <CustomAccordion
-                key={topic.id}
-                topic={topic}
-                setCurrentAction={setCurrentAction}
-              />
-            ))}
+          {topicDetail?.length
+            ? topicDetail?.map((topic) => (
+                <CustomAccordion
+                  key={topic.id}
+                  topic={topic}
+                  setCurrentAction={setCurrentAction}
+                />
+              ))
+            : ""}
         </div>
       </SortableContext>
       <DragOverlay dropAnimation={dropAnimation}>

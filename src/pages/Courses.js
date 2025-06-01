@@ -42,7 +42,7 @@ import { useDispatch, useSelector } from "react-redux";
 const { resetValidateCourse } = courseSlices.actions;
 const thumbDefault =
   "http://res.cloudinary.com/daxftrleb/image/upload/v1711213412/e-learning/jmvs3r7br0kakgayybkf.png";
-export default function Courses() {
+export default function Courses({ isTeacher }) {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -70,7 +70,7 @@ export default function Courses() {
   });
   const showCreateModal = () => {
     form.resetFields();
-    editorRef.current?.setContent("");
+    editorRef?.current?.setContent("");
     setIsEdit(false);
     setIsModalOpen(true);
   };
@@ -79,7 +79,7 @@ export default function Courses() {
     form.resetFields();
     setTypeCourseId(null);
     setUrlAvatar(thumbDefault);
-    editorRef.current.setContent("");
+    editorRef?.current?.setContent("");
     setIsModalOpen(false);
   };
   const handleEditCourse = async () => {
@@ -92,7 +92,7 @@ export default function Courses() {
           ...formValues,
           id,
           thumb: urlAvatar,
-          desc: editorRef.current.getContent(),
+          desc: editorRef?.current?.getContent(),
         })
       );
       const { message } = unwrapResult(response);
@@ -304,7 +304,12 @@ export default function Courses() {
       key: "title",
       render: (title, { slug }) => {
         return (
-          <Link className="hover:italic" href={`/courses/${slug}`}>
+          <Link
+            className="hover:italic"
+            href={
+              isTeacher ? `/teacher/courses/${slug}` : `/admin/courses/${slug}`
+            }
+          >
             {title}
           </Link>
         );

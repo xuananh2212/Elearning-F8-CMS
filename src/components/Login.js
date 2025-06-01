@@ -77,7 +77,11 @@ export default function Login() {
       document.cookie = "token" + "=" + accessToken + expires + "; path=/";
       document.cookie =
         "refreshToken" + "=" + refreshToken + expires + "; path=/";
-      router.push("/");
+      if (user.role === 2) {
+        router.push("/admin");
+      } else if (user.role === 1) {
+        router.push("/teacher");
+      }
     }
   }, [user]);
 

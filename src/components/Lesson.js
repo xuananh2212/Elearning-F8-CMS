@@ -1,8 +1,11 @@
+import LessonService from "@/services/Lessons";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Button, Checkbox, Tooltip } from "@nextui-org/react";
-import { useState } from "react";
+import { Button } from "@nextui-org/react";
+import { Popconfirm } from "antd";
 import { MdDelete } from "react-icons/md";
+import { useMutation, useQueryClient } from "react-query";
+import { toast } from "react-toastify";
 function getLessonType(lesson) {
   if (lesson.LessonDocument) {
     return "2";
@@ -16,7 +19,29 @@ function getLessonType(lesson) {
 }
 
 export default function Lesson({ lesson, topicSort, setCurrentAction }) {
-  const [isSelected, setIsSelected] = useState(false);
+  const queryClient = useQueryClient();
+  const { mutateAsync: deleteLessonMutation } = useMutation({
+    mutationFn: async (lesson) => {
+      // Xoá theo loại
+      if (lesson.LessonVideo) {
+        await LessonService.deleteLessonVideo(lesson.LessonVideo.id);
+      } else if (lesson.LessonDocument) {
+        await LessonService.deleteLessonDocument(lesson.LessonDocument.id);
+      } else if (lesson.LessonQuiz) {
+        await LessonService.deleteLessonQuiz(lesson.LessonQuiz.id);
+      }
+      // Sau đó xoá lesson
+      await LessonService.deleteLesson(lesson.id);
+    },
+    onSuccess: async () => {
+      setCurrentAction(null);
+      toast.success("Xoá bài học thành công");
+      await queryClient.invalidateQueries({ queryKey: ["COURSE"] });
+    },
+    onError: () => {
+      toast.error("Đã xảy ra lỗi khi xoá bài học");
+    },
+  });
   const {
     attributes,
     listeners,
@@ -51,18 +76,22 @@ export default function Lesson({ lesson, topicSort, setCurrentAction }) {
           }));
         }}
       >
-        <Checkbox isSelected={isSelected} onValueChange={setIsSelected} />
         <p className="w-full">
           {`${topicSort}. ${lesson.sort}. ${lesson.title}`}
         </p>
-
-        <Tooltip color="danger" content="Xoá bài học">
+        <Popconfirm
+          title="Bạn có chắc chắn muốn xóa bài học này không?"
+          description="Hành động này sẽ không thể hoàn tác."
+          onConfirm={() => deleteLessonMutation(lesson)}
+          okText="Có"
+          cancelText="Không"
+        >
           <Button>
             <span className="text-lg text-danger cursor-pointer active:opacity-50">
               <MdDelete className="text-[20px]" />
             </span>
           </Button>
-        </Tooltip>
+        </Popconfirm>
       </div>
     </div>
   );
