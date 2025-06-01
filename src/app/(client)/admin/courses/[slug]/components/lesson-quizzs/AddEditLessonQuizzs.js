@@ -43,6 +43,7 @@ const AddEditLessonQuizzs = ({ currentAction, setCurrentAction }) => {
       return response?.data;
     },
     onSuccess: async () => {
+      setCurrentAction(null);
       toast.success(`Cập nhật bộ đề trắc nghiệm thành công`);
       await queryClient.invalidateQueries({ queryKey: ["COURSE"] });
     },
@@ -74,7 +75,6 @@ const AddEditLessonQuizzs = ({ currentAction, setCurrentAction }) => {
     try {
       if (isEditMode) {
         const lessonQuizId = currentAction.lessonType.LessonQuiz.id;
-
         const formattedQuestions = values.questions.map((q, index) => ({
           id: currentAction.lessonType.LessonQuiz.Questions[index]?.id,
           question: q.content,

@@ -39,6 +39,9 @@ export class LessonService {
   static addQuestionsBatch(params) {
     return axiosInstance.post("lessonQuiz/v1/question/many", params);
   }
+  static updateQuestionsBatch(params) {
+    return axiosInstance.post("lessonQuiz/v1/question/edit-many", params);
+  }
 }
 
 export default LessonService;
