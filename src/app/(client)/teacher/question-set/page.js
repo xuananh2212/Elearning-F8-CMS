@@ -12,12 +12,16 @@ import {
   Form,
   Input,
   Modal,
+  Popconfirm,
   Radio,
   Row,
   Select,
+  Space,
   Table,
+  Tooltip,
 } from "antd";
 import { useEffect, useState } from "react";
+import { MdDelete, MdEdit } from "react-icons/md";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -28,8 +32,10 @@ export default function QuestionSetsPage() {
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.userInfo);
   const categories = useSelector((state) => state.category.categories);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [questionInputs, setQuestionInputs] = useState([
     {
       question: "",
@@ -42,13 +48,14 @@ export default function QuestionSetsPage() {
   const [validateCourse, setValidateCourse] = useState({});
 
   const { data, isLoading } = useQuery({
-    queryKey: ["questionSets"],
+    queryKey: ["questionSets", user],
     queryFn: async () => {
       const res = await axiosInstance.get(
-        "/question-set/v1/question-sets-with-questions"
+        `/question-set/v1/question-sets-with-questions/teacher/${user?.id}`
       );
       return res.data;
     },
+    enabled: !!user?.id,
   });
   const { data: teachers, isFetching } = useQuery({
     queryKey: "teachers",
@@ -90,6 +97,41 @@ export default function QuestionSetsPage() {
       toast.success("Thêm bộ đề thành công");
     },
   });
+  const { mutateAsync } = useMutation({
+    mutationFn: async (id) => {
+      return await axiosInstance.delete(`/question-set/v1/${id}`);
+    },
+    onSuccess: () => {
+      toast.success("Xóa bộ đề thành công");
+      queryClient.invalidateQueries(["questionSets"]);
+      resetForm();
+    },
+  });
+  const { mutate: updateMutate } = useMutation({
+    mutationFn: async (data) => {
+      const res = await axiosInstance.post("/question-set/v1/edit", data); // gọi API update
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["questionSets"]);
+      toast.success("Cập nhật bộ đề thành công");
+      resetForm();
+      setModalOpen(false);
+    },
+  });
+  const resetForm = () => {
+    form.resetFields();
+    setQuestionInputs([
+      {
+        question: "",
+        explain: "",
+        correctAnswer: "A",
+        answers: ["", "", "", ""],
+      },
+    ]);
+    setUrlAvatar("");
+    setEditId(null);
+  };
 
   const handleAddQuestionInput = () => {
     setQuestionInputs([
@@ -116,14 +158,16 @@ export default function QuestionSetsPage() {
     }
 
     const payload = {
+      ...(editId ? { id: editId } : {}),
       title: values.title,
       description: values.description,
       thumb: urlAvatar,
       duration: Number(values.duration),
       totalQuestions: Number(values.totalQuestions),
       categoryId: values.categoryId,
-      teacherId: values?.teacherId,
+      teacherId: user?.id,
       questions: questionInputs.map((q) => ({
+        ...(q.id ? { id: q.id } : {}),
         question: q.question,
         explain: q.explain,
         correctAnswer: q.correctAnswer,
@@ -131,7 +175,44 @@ export default function QuestionSetsPage() {
       })),
     };
 
-    mutate(payload);
+    if (editId) {
+      updateMutate({
+        id: editId,
+        ...payload,
+      });
+    } else {
+      mutate(payload);
+    }
+  };
+  const handleEditQuestionSet = (record) => {
+    setEditId(record.id); // 👈 set ID vào state
+
+    form.setFieldsValue({
+      title: record.title,
+      description: record.description,
+      duration: record.duration,
+      totalQuestions: record.total_questions,
+      categoryId: record.category_id,
+      teacherId: record.teacher_id,
+    });
+
+    setUrlAvatar(record.thumb);
+
+    const questions =
+      record.Questions?.map((q) => {
+        const correctIndex = q.Answers?.findIndex((a) => a.result) ?? 0;
+
+        return {
+          id: q.id, // 👈 cần truyền id câu hỏi để phân biệt edit/add
+          question: q.question,
+          explain: q.explain,
+          correctAnswer: ["A", "B", "C", "D"][correctIndex] || "A",
+          answers: q.Answers?.map((a) => a.name) ?? ["", "", "", ""],
+        };
+      }) ?? [];
+
+    setQuestionInputs(questions);
+    setModalOpen(true);
   };
 
   const columns = [
@@ -141,17 +222,50 @@ export default function QuestionSetsPage() {
     { title: "Giáo viên", dataIndex: "teacher_name" },
     { title: "Thời lượng (phút)", dataIndex: "duration" },
     { title: "Tổng số câu hỏi", dataIndex: "total_questions" },
+    {
+      title: "Hành động",
+      key: "action",
+      render: (_, record) => (
+        <Space size="middle">
+          <Tooltip placement="top" title="Chỉnh Sửa">
+            <Button onClick={() => handleEditQuestionSet(record)}>
+              <MdEdit className="text-[20px]" />
+            </Button>
+          </Tooltip>
+          <Popconfirm
+            title="Bạn có chắc bạn muốn xóa bộ đề này không?"
+            description="Hành động này sẽ không thể hoàn tác."
+            onConfirm={async () => {
+              try {
+                await mutateAsync(record?.id);
+              } catch (e) {}
+            }}
+            okText="Có"
+            cancelText="Không"
+          >
+            <Tooltip placement="top" title="Xóa">
+              <Button type="primary" danger>
+                <MdDelete className="text-[20px]" />
+              </Button>
+            </Tooltip>
+          </Popconfirm>
+        </Space>
+      ),
+    },
   ];
-
+  console.log("1");
   return (
-    <div className="p-4 max-w-6xl mx-auto">
+    <div className="p-4 max-w-8xl mx-auto">
       <Card
         title="Danh sách bộ đề"
         extra={
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => setModalOpen(true)}
+            onClick={() => {
+              setModalOpen(true);
+              resetForm();
+            }}
           >
             Thêm bộ đề
           </Button>
@@ -206,14 +320,7 @@ export default function QuestionSetsPage() {
                   }))}
                 />
               </Form.Item>
-              <Form.Item name="teacherId" label="Giáo viên">
-                <Select
-                  options={teachers?.map(({ id, name }) => ({
-                    value: id,
-                    label: name,
-                  }))}
-                />
-              </Form.Item>
+
               <Form.Item name="thumb" label="Ảnh Bộ đề">
                 <UploadImage
                   styleImage={1}
