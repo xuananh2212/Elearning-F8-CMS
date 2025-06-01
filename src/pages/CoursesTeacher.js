@@ -7,7 +7,7 @@ import {
   requestAddCourse,
   requestDeleteCourse,
   requestDeleteManyCourse,
-  requestGetAllCourse,
+  requestGetAllCourseByTeacher,
   requestUpdateCourse,
 } from "@/store/middlewares/course.middewares";
 import { requestGetDiscounts } from "@/store/middlewares/discount.middewares";
@@ -39,15 +39,17 @@ import { MdDelete, MdEdit } from "react-icons/md";
 import { RiDeleteBin2Fill } from "react-icons/ri";
 import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 const { resetValidateCourse } = courseSlices.actions;
 const thumbDefault =
   "http://res.cloudinary.com/daxftrleb/image/upload/v1711213412/e-learning/jmvs3r7br0kakgayybkf.png";
-export default function CoursesTeacher({ isTeacher }) {
+export default function CoursesTeacher() {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const dispatch = useDispatch();
   const editorRef = useRef(null);
+  const user = useSelector((state) => state.user.userInfo);
   const courses = useSelector((state) => state.course.courses);
   const discounts = useSelector((state) => state.discount.discounts);
   const categories = useSelector((state) => state.category.categories);
@@ -90,6 +92,7 @@ export default function CoursesTeacher({ isTeacher }) {
       const response = await dispatch(
         requestUpdateCourse({
           ...formValues,
+          teacherId: user?.id,
           id,
           thumb: urlAvatar,
           desc: editorRef?.current?.getContent(),
@@ -103,6 +106,7 @@ export default function CoursesTeacher({ isTeacher }) {
       setPrice(null);
       setIsModalOpen(false);
       form.resetFields(null);
+      toast.success("Cập nhật khóa học thành công");
     } catch (e) {
       console.error(e);
     }
@@ -116,6 +120,7 @@ export default function CoursesTeacher({ isTeacher }) {
       const response = await dispatch(
         requestAddCourse({
           ...formValues,
+          teacherId: user?.id,
           thumb: urlAvatar,
           desc: editorRef.current?.getContent(),
         })
@@ -257,9 +262,14 @@ export default function CoursesTeacher({ isTeacher }) {
   };
   const requestLoadCourses = async () => {
     try {
-      const response = await dispatch(requestGetAllCourse());
+      if (!user?.id) {
+        return;
+      }
+      const response = await dispatch(requestGetAllCourseByTeacher(user?.id));
       unwrapResult(response);
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+    }
   };
   const requestLoadTypeCourse = async () => {
     try {
@@ -285,7 +295,7 @@ export default function CoursesTeacher({ isTeacher }) {
     }
     requestLoadCourses();
     requestLoadTypeCourse();
-  }, []);
+  }, [user]);
   useEffect(() => {
     handleChangeDiscountedPrice();
   }, [price, discountPercent]);
@@ -304,12 +314,7 @@ export default function CoursesTeacher({ isTeacher }) {
       key: "title",
       render: (title, { slug }) => {
         return (
-          <Link
-            className="hover:italic"
-            href={
-              isTeacher ? `/teacher/courses/${slug}` : `/admin/courses/${slug}`
-            }
-          >
+          <Link className="hover:italic" href={`/teacher/courses/${slug}`}>
             {title}
           </Link>
         );
@@ -683,20 +688,6 @@ export default function CoursesTeacher({ isTeacher }) {
                   options={
                     categories &&
                     categories.map(({ id, name }) => {
-                      return { value: id, label: name };
-                    })
-                  }
-                />
-              </Form.Item>
-              <Form.Item
-                name="teacherId"
-                label={<h3 className="text-[16px] font-medium">Giáo viên:</h3>}
-              >
-                <Select
-                  onChange={handleChangeCategory}
-                  options={
-                    teachers &&
-                    teachers.map(({ id, name }) => {
                       return { value: id, label: name };
                     })
                   }
