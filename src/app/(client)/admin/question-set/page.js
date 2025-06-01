@@ -34,6 +34,7 @@ export default function QuestionSetsPage() {
   const dispatch = useDispatch();
   const categories = useSelector((state) => state.category.categories);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [questionInputs, setQuestionInputs] = useState([
     {
       question: "",
@@ -94,6 +95,31 @@ export default function QuestionSetsPage() {
       toast.success("Thêm bộ đề thành công");
     },
   });
+  const { mutate: updateMutate } = useMutation({
+    mutationFn: async (data) => {
+      const res = await axiosInstance.post("/question-set/v1/edit", data); // gọi API update
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["questionSets"]);
+      toast.success("Cập nhật bộ đề thành công");
+      resetForm();
+      setModalOpen(false);
+    },
+  });
+  const resetForm = () => {
+    form.resetFields();
+    setQuestionInputs([
+      {
+        question: "",
+        explain: "",
+        correctAnswer: "A",
+        answers: ["", "", "", ""],
+      },
+    ]);
+    setUrlAvatar("");
+    setEditId(null);
+  };
 
   const handleAddQuestionInput = () => {
     setQuestionInputs([
@@ -120,6 +146,7 @@ export default function QuestionSetsPage() {
     }
 
     const payload = {
+      ...(editId ? { id: editId } : {}),
       title: values.title,
       description: values.description,
       thumb: urlAvatar,
@@ -128,6 +155,7 @@ export default function QuestionSetsPage() {
       categoryId: values.categoryId,
       teacherId: values?.teacherId,
       questions: questionInputs.map((q) => ({
+        ...(q.id ? { id: q.id } : {}),
         question: q.question,
         explain: q.explain,
         correctAnswer: q.correctAnswer,
@@ -135,7 +163,44 @@ export default function QuestionSetsPage() {
       })),
     };
 
-    mutate(payload);
+    if (editId) {
+      updateMutate({
+        id: editId,
+        ...payload,
+      });
+    } else {
+      mutate(payload);
+    }
+  };
+  const handleEditQuestionSet = (record) => {
+    setEditId(record.id); // 👈 set ID vào state
+
+    form.setFieldsValue({
+      title: record.title,
+      description: record.description,
+      duration: record.duration,
+      totalQuestions: record.total_questions,
+      categoryId: record.category_id,
+      teacherId: record.teacher_id,
+    });
+
+    setUrlAvatar(record.thumb);
+
+    const questions =
+      record.Questions?.map((q) => {
+        const correctIndex = q.Answers?.findIndex((a) => a.result) ?? 0;
+
+        return {
+          id: q.id, // 👈 cần truyền id câu hỏi để phân biệt edit/add
+          question: q.question,
+          explain: q.explain,
+          correctAnswer: ["A", "B", "C", "D"][correctIndex] || "A",
+          answers: q.Answers?.map((a) => a.name) ?? ["", "", "", ""],
+        };
+      }) ?? [];
+
+    setQuestionInputs(questions);
+    setModalOpen(true);
   };
 
   const columns = [
@@ -148,10 +213,10 @@ export default function QuestionSetsPage() {
     {
       title: "Hành động",
       key: "action",
-      render: (discount, { id }) => (
+      render: (_, record) => (
         <Space size="middle">
           <Tooltip placement="top" title="Chỉnh Sửa">
-            <Button>
+            <Button onClick={() => handleEditQuestionSet(record)}>
               <MdEdit className="text-[20px]" />
             </Button>
           </Tooltip>
@@ -182,7 +247,10 @@ export default function QuestionSetsPage() {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => setModalOpen(true)}
+            onClick={() => {
+              setModalOpen(true);
+              resetForm();
+            }}
           >
             Thêm bộ đề
           </Button>
