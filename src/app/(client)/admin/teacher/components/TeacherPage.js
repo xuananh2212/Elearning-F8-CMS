@@ -119,13 +119,15 @@ export default function Teachers() {
       title: "Ảnh đại diện",
       dataIndex: "avatar",
       render: (text) => (
-        <Image
-          src={text || avatarDefault}
-          width={30}
-          height={30}
-          className="rounded-full object-cover"
-          alt="avatar"
-        />
+        <div className="flex items-center justify-center">
+          <Image
+            src={text || avatarDefault}
+            width={30}
+            height={30}
+            className="rounded-full object-cover"
+            alt="avatar"
+          />
+        </div>
       ),
       align: "center",
     },
