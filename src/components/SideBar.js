@@ -25,37 +25,37 @@ export default function SideBar() {
   const menu = [
     {
       title: "Thống kê",
-      path: "/admin",
+      path: "/ROLE",
       icon: <MdDashboard className="text-[22px] text-[#404040]" />,
       roles: ["admin"],
     },
     {
       title: "Giáo viên",
-      path: "/admin/teacher",
+      path: "/ROLE/teacher",
       icon: <GiTeacher className="text-[20px] text-[#404040]" />,
       roles: ["admin"],
     },
     {
       title: "Người dùng",
-      path: "/admin/users",
+      path: "/ROLE/users",
       icon: <FaUserAlt className="text-[20px] text-[#404040]" />,
       roles: ["admin"],
     },
     {
       title: "Danh mục",
-      path: "/admin/categories",
+      path: "/ROLE/categories",
       icon: <FaFile className="text-[20px] text-[#404040]" />,
       roles: ["admin"],
     },
     {
       title: "Bộ đề",
-      path: "/teacher/question-set",
+      path: "/ROLE/question-set",
       icon: <BsFillQuestionSquareFill className="text-[20px] text-[#404040]" />,
       roles: ["teacher", "admin"],
     },
     {
       title: "Khóa học",
-      path: "/teacher/courses",
+      path: "/ROLE/courses",
       icon: <FaBookOpen className="text-[20px] text-[#404040]" />,
       roles: ["teacher", "admin"],
     },
@@ -71,21 +71,24 @@ export default function SideBar() {
         <ul className="mt-4">
           {menu
             .filter((item) => item.roles.includes(currentRole))
-            .map(({ title, icon, path }, index) => (
-              <li key={index}>
-                <Link
-                  href={path}
-                  className={`flex items-center flex-col w-[72px] h-[72px] justify-center mt-1 rounded-2xl cursor-pointer ${
-                    pathname === path ? "bg-[#e8ebed]" : ""
-                  }`}
-                >
-                  {icon}
-                  <span className="text-[11px] text-[#404040] mt-2 font-semibold">
-                    {title}
-                  </span>
-                </Link>
-              </li>
-            ))}
+            .map(({ title, icon, path }, index) => {
+              const resolvedPath = path.replace("ROLE", currentRole);
+              return (
+                <li key={index}>
+                  <Link
+                    href={resolvedPath}
+                    className={`flex items-center flex-col w-[72px] h-[72px] justify-center mt-1 rounded-2xl cursor-pointer ${
+                      pathname === resolvedPath ? "bg-[#e8ebed]" : ""
+                    }`}
+                  >
+                    {icon}
+                    <span className="text-[11px] text-[#404040] mt-2 font-semibold">
+                      {title}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
         </ul>
       </div>
     </aside>

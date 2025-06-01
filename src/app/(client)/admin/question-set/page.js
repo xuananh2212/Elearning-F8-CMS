@@ -12,12 +12,16 @@ import {
   Form,
   Input,
   Modal,
+  Popconfirm,
   Radio,
   Row,
   Select,
+  Space,
   Table,
+  Tooltip,
 } from "antd";
 import { useEffect, useState } from "react";
+import { MdDelete, MdEdit } from "react-icons/md";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -141,10 +145,37 @@ export default function QuestionSetsPage() {
     { title: "Giáo viên", dataIndex: "teacher_name" },
     { title: "Thời lượng (phút)", dataIndex: "duration" },
     { title: "Tổng số câu hỏi", dataIndex: "total_questions" },
+    {
+      title: "Hành động",
+      key: "action",
+      render: (discount, { id }) => (
+        <Space size="middle">
+          <Tooltip placement="top" title="Chỉnh Sửa">
+            <Button>
+              <MdEdit className="text-[20px]" />
+            </Button>
+          </Tooltip>
+          <Popconfirm
+            title="Bạn có chắc bạn muốn xóa mục này không?"
+            onConfirm={() => {
+              handleDeleteDiscount(id);
+            }}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Tooltip placement="top" title="Xóa">
+              <Button type="primary" danger>
+                <MdDelete className="text-[20px]" />
+              </Button>
+            </Tooltip>
+          </Popconfirm>
+        </Space>
+      ),
+    },
   ];
-
+  console.log("1");
   return (
-    <div className="p-4 max-w-6xl mx-auto">
+    <div className="p-4 max-w-8xl mx-auto">
       <Card
         title="Danh sách bộ đề"
         extra={

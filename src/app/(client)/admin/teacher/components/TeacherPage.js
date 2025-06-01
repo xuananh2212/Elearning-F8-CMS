@@ -22,8 +22,7 @@ import { IoMdAdd } from "react-icons/io";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-const avatarDefault =
-  "http://res.cloudinary.com/daxftrleb/image/upload/v1709733165/e-learning/xpasxyscc4jh0tz7rlzu.png";
+const avatarDefault = "/images/user.png";
 
 export default function Teachers() {
   const queryClient = useQueryClient();
