@@ -27,7 +27,7 @@ export default function SideBar() {
       title: "Thống kê",
       path: "/ROLE",
       icon: <MdDashboard className="text-[22px] text-[#404040]" />,
-      roles: ["admin"],
+      roles: ["admin", "teacher"],
     },
     {
       title: "Giáo viên",
