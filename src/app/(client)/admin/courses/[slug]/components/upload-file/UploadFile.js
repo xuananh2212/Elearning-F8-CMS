@@ -4,6 +4,7 @@ import Dragger from "antd/es/upload/Dragger";
 import clsx from "clsx";
 import ReactPlayer from "react-player";
 import { toast } from "sonner";
+import styles from "./UploadFile.module.scss";
 const validateFile = (file, fileType) => {
   let isValid = true;
   let errorMessage = "";
@@ -114,7 +115,7 @@ const UploadFile = ({
 
   return (
     <Form.Item
-      className={clsx(readonly ? "pointer-events-none" : "")}
+      className={clsx(readonly ? "pointer-events-none" : "", props.className)}
       name={nameFile}
       label={label}
       rules={props?.rules}
@@ -122,12 +123,10 @@ const UploadFile = ({
       <Dragger
         beforeUpload={beforeUploadHandler}
         onChange={(info) => onChangeHandler(info)}
-        //    className={styles.removeNameFile}
+        className={styles.removeNameFile}
       >
         {fileUrl ? (
-          <div
-          //   className={styles.fileContainer}
-          >
+          <div className={styles.fileContainer}>
             {type !== "add" ? (
               <>
                 <ReactPlayer
@@ -141,9 +140,7 @@ const UploadFile = ({
             ) : (
               renderPreview()
             )}
-            <div
-            //   className={styles.overlay}
-            >
+            <div className={styles.overlay}>
               <Button
                 className="bg-transparent text-white border-none"
                 onClick={(e) => {

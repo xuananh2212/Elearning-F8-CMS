@@ -3,6 +3,7 @@ import TextEdit from "@/components/TextEdit";
 import LessonService from "@/services/Lessons";
 import UploadService from "@/services/Upload";
 import { Button, Form, Input } from "antd";
+import FormItem from "antd/es/form/FormItem";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
@@ -25,6 +26,12 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
       return response?.data;
     },
   });
+  const { mutateAsync: mutateUpdateLessonAsync } = useMutation({
+    mutationFn: async (data) => {
+      const response = await LessonService.updateLesson(data);
+      return response?.data;
+    },
+  });
 
   const { mutateAsync: mutateAddLessonVideoAsync } = useMutation({
     mutationFn: async (data) => {
@@ -44,6 +51,7 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
       return response?.data;
     },
     onSuccess: async () => {
+      setCurrentAction(null);
       toast.success(`Cập nhật bài học video thành công`);
       await queryClient.invalidateQueries({ queryKey: ["COURSE"] });
     },
@@ -67,6 +75,7 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
       return response?.data;
     },
     onSuccess: async () => {
+      setCurrentAction(null);
       toast.success(`Cập nhật bài học tài liệu thành công`);
       await queryClient.invalidateQueries({ queryKey: ["COURSE"] });
     },
@@ -90,35 +99,42 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
 
   const onFinish = async (data) => {
     try {
-      setLoading(true); // ✅ Bắt đầu loading
+      setLoading(true);
 
       let finalLessonId = lessonId;
-
       if (!isEditMode) {
         const lessonData = await mutateAddLessonAsync({
           topicId: currentAction?.id,
           title: data?.title,
         });
         finalLessonId = lessonData?.lesson?.id;
+      } else {
+        const lessonData = await mutateUpdateLessonAsync({
+          id: currentAction?.lessonType?.id,
+          title: data?.title,
+        });
+        finalLessonId = lessonData?.lesson?.id;
       }
-
       const fileVideoFile = data?.fileVideoFile?.file;
 
       if (!isHiddenVideos) {
+        const payload = {
+          url: data?.videoUrl,
+          lessonId: finalLessonId,
+        };
         if (fileVideoFile) {
           const file = new FormData();
           file.append("file", fileVideoFile);
           const response = await mutateUploadFileVideoAsync(file);
-          const payload = {
-            url: `${URL_IMAGE}${response?.playlistUrl}`,
-            lessonId: finalLessonId,
-          };
-
-          if (isEditMode) {
-            await mutateUpdateLessonVideoAsync(payload);
-          } else {
-            await mutateAddLessonVideoAsync(payload);
-          }
+          payload.url = `${URL_IMAGE}${response?.playlistUrl}`;
+        }
+        if (isEditMode) {
+          await mutateUpdateLessonVideoAsync({
+            ...payload,
+            id: currentAction?.lessonType?.LessonVideo?.id,
+          });
+        } else {
+          await mutateAddLessonVideoAsync(payload);
         }
       } else {
         const content = editorRef.current?.getContent();
@@ -180,6 +196,7 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
         </Form.Item>
         {!isHiddenVideos && (
           <UploadFile
+            className="h-[500px]"
             rules={[
               {
                 required: !isEditMode,
@@ -213,6 +230,7 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
             {isEditMode ? "Cập nhật" : "Tạo"}
           </Button>
         </div>
+        <FormItem name="videoUrl" />
       </Form>
     </div>
   );

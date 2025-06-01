@@ -1,0 +1,42 @@
+.removeNameFile {
+  flex: 1;
+  :global {
+    .ant-upload-list-item-container {
+      display: none;
+    }
+    .ant-form-item {
+      border: 1px;
+    }
+  }
+}
+
+.fileContainer {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  img {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: cover !important;
+  }
+  // .overlay {
+  //   position: absolute;
+  //   top: 0;
+  //   right: 0;
+  //   bottom: 0;
+  //   left: 0;
+  //   background-color: rgba(0, 0, 0, 0.5);
+  //   display: flex;
+  //   justify-content: flex-end;
+  //   align-items: flex-start;
+  //   opacity: 0;
+  //   transition: opacity 0.3s ease;
+  // }
+  // &:hover {
+  //   .overlay {
+  //     opacity: 1;
+  //   }
+  // }
+}
