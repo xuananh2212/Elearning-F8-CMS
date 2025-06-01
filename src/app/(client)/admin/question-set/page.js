@@ -95,6 +95,16 @@ export default function QuestionSetsPage() {
       toast.success("Thêm bộ đề thành công");
     },
   });
+  const { mutateAsync } = useMutation({
+    mutationFn: async (id) => {
+      return await axiosInstance.delete(`/question-set/v1/${id}`);
+    },
+    onSuccess: () => {
+      toast.success("Xóa bộ đề thành công");
+      queryClient.invalidateQueries(["questionSets"]);
+      resetForm();
+    },
+  });
   const { mutate: updateMutate } = useMutation({
     mutationFn: async (data) => {
       const res = await axiosInstance.post("/question-set/v1/edit", data); // gọi API update
@@ -221,12 +231,15 @@ export default function QuestionSetsPage() {
             </Button>
           </Tooltip>
           <Popconfirm
-            title="Bạn có chắc bạn muốn xóa mục này không?"
-            onConfirm={() => {
-              handleDeleteDiscount(id);
+            title="Bạn có chắc bạn muốn xóa bộ đề này không?"
+            description="Hành động này sẽ không thể hoàn tác."
+            onConfirm={async () => {
+              try {
+                await mutateAsync(record?.id);
+              } catch (e) {}
             }}
-            okText="Yes"
-            cancelText="No"
+            okText="Có"
+            cancelText="Không"
           >
             <Tooltip placement="top" title="Xóa">
               <Button type="primary" danger>
