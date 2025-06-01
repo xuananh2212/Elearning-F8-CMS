@@ -20,6 +20,9 @@ export class LessonService {
   static addLessonDocument(params) {
     return axiosInstance.post("lessonDocument/v1", params);
   }
+  static updateLessonDocument(params) {
+    return axiosInstance.post(`lessonDocument/v1/${params?.id}`, params);
+  }
 
   static addLessonQuiz(params) {
     return axiosInstance.post("lessonQuiz/v1", params);

@@ -87,10 +87,7 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
       return response?.data;
     },
   });
-  const {
-    isPending: isUploadFileVideoPending,
-    mutateAsync: mutateUploadFileVideoAsync,
-  } = useMutation({
+  const { mutateAsync: mutateUploadFileVideoAsync } = useMutation({
     mutationFn: async (file) => {
       const response = await UploadService.uploadFileVideoV2(file);
       return response?.data;
@@ -144,7 +141,10 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
         };
 
         if (isEditMode) {
-          await mutateUpdateLessonDocumentAsync(payload);
+          await mutateUpdateLessonDocumentAsync({
+            ...payload,
+            id: currentAction?.lessonType?.LessonDocument?.id,
+          });
         } else {
           await mutateAddLessonDocumentAsync(payload);
         }
@@ -153,7 +153,7 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
       console.error(e);
       toast.error("Đã xảy ra lỗi khi xử lý bài học");
     } finally {
-      setLoading(false); // ✅ Kết thúc loading dù thành công hay lỗi
+      setLoading(false);
     }
   };
 
