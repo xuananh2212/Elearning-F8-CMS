@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import UploadFile from "../upload-file/UploadFile";
-
+export const URL_IMAGE = "http://localhost:3000";
 const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
   const [form] = Form.useForm();
   const editorRef = useRef(null);
@@ -78,6 +78,15 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
       return response?.data;
     },
   });
+  const {
+    isPending: isUploadFileVideoPending,
+    mutateAsync: mutateUploadFileVideoAsync,
+  } = useMutation({
+    mutationFn: async (file) => {
+      const response = await UploadService.uploadFileVideoV2(file);
+      return response?.data;
+    },
+  });
 
   const onFinish = async (data) => {
     try {
@@ -99,9 +108,9 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
         if (fileVideoFile) {
           const file = new FormData();
           file.append("file", fileVideoFile);
-          const uploadRes = await mutateUploadAsync(file);
+          const response = await mutateUploadFileVideoAsync(file);
           const payload = {
-            url: uploadRes?.data,
+            url: `${URL_IMAGE}${response?.playlistUrl}`,
             lessonId: finalLessonId,
           };
 
@@ -177,8 +186,8 @@ const AddEditVideos = ({ currentAction, setCurrentAction, isHiddenVideos }) => {
                 message: "Vui lòng chọn video tải lên!",
               },
             ]}
-            type={"add"}
             form={form}
+            type={isEditMode ? "edit" : "add"}
             nameUrl="videoUrl"
             nameFile="fileVideoFile"
             label="Tải video"

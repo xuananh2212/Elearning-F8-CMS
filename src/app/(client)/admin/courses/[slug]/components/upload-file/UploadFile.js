@@ -110,6 +110,7 @@ const UploadFile = ({
 
     return null;
   };
+  console.log("fileUrl", fileUrl);
 
   return (
     <Form.Item

@@ -9,6 +9,14 @@ class UploadService {
       allowSpacing: true,
     });
   }
+  static uploadFileVideoV2(file) {
+    return axiosInstance.post("/upload/v2", file, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      allowSpacing: true,
+    });
+  }
 }
 
 export default UploadService;
