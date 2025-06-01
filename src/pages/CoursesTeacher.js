@@ -39,11 +39,10 @@ import { MdDelete, MdEdit } from "react-icons/md";
 import { RiDeleteBin2Fill } from "react-icons/ri";
 import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
 const { resetValidateCourse } = courseSlices.actions;
 const thumbDefault =
   "http://res.cloudinary.com/daxftrleb/image/upload/v1711213412/e-learning/jmvs3r7br0kakgayybkf.png";
-export default function Courses({ isTeacher }) {
+export default function CoursesTeacher({ isTeacher }) {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -104,7 +103,6 @@ export default function Courses({ isTeacher }) {
       setPrice(null);
       setIsModalOpen(false);
       form.resetFields(null);
-      toast.success("cập nhật khóa học thành công");
     } catch (e) {
       console.error(e);
     }
@@ -184,9 +182,6 @@ export default function Courses({ isTeacher }) {
   };
   const handleChangeCategory = (value) => {
     form.setFieldValue("categoryId", value);
-  };
-  const handleChangeTeacher = (value) => {
-    form.setFieldValue("teacherId", value);
   };
   const handleChangePrice = (value) => {
     setPrice(value);
@@ -698,7 +693,7 @@ export default function Courses({ isTeacher }) {
                 label={<h3 className="text-[16px] font-medium">Giáo viên:</h3>}
               >
                 <Select
-                  onChange={handleChangeTeacher}
+                  onChange={handleChangeCategory}
                   options={
                     teachers &&
                     teachers.map(({ id, name }) => {

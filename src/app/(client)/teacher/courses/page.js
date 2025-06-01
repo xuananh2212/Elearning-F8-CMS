@@ -2,7 +2,7 @@ export const metadata = {
   title: "Khoá Học",
   description: "...",
 };
-import Courses from "@/pages/Courses";
+import CoursesTeacher from "@/pages/CoursesTeacher";
 import { Card } from "antd";
 export default function page() {
   return (
@@ -10,7 +10,7 @@ export default function page() {
       <h1 className="text-[#242424] text-[28px] font-black">
         Quản lý khoá học
       </h1>
-      <Courses />
+      <CoursesTeacher />
     </Card>
   );
 }
