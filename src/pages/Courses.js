@@ -128,7 +128,7 @@ export default function Courses({ isTeacher }) {
       setIsModalOpen(false);
       form.resetFields();
       notification.success({
-        message,
+        message: "Tạo thành công",
         duration: 1.0,
       });
       setConfirmLoading(false);
