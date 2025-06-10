@@ -6,9 +6,8 @@ import { BsFillQuestionSquareFill } from "react-icons/bs";
 import { FaUserAlt } from "react-icons/fa";
 import { FaBookOpen, FaFile } from "react-icons/fa6";
 import { GiTeacher } from "react-icons/gi";
-import { MdDashboard } from "react-icons/md";
+import { MdDashboard, MdPayments } from "react-icons/md";
 import { useSelector } from "react-redux";
-
 export default function SideBar() {
   const pathname = usePathname();
   const isCoursePage = pathname.includes("/courses/");
@@ -58,6 +57,12 @@ export default function SideBar() {
       path: "/ROLE/courses",
       icon: <FaBookOpen className="text-[20px] text-[#404040]" />,
       roles: ["teacher", "admin"],
+    },
+    {
+      title: "Thanh toán",
+      path: "/ROLE/payment",
+      icon: <MdPayments className="text-[20px] text-[#404040]" />,
+      roles: ["admin"],
     },
   ];
 

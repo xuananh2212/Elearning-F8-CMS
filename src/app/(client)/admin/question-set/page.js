@@ -251,7 +251,6 @@ export default function QuestionSetsPage() {
       ),
     },
   ];
-  console.log("1");
   return (
     <div className="p-4 max-w-8xl mx-auto">
       <Card
