@@ -286,7 +286,7 @@ export default function QuestionSetsPage() {
       </Card>
 
       <Modal
-        title="Thêm bộ đề"
+        title="Bộ đề"
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         footer={null}
