@@ -19,7 +19,7 @@ import { useForm } from "antd/es/form/Form";
 import Image from "next/image";
 import { useState } from "react";
 import { IoMdAdd } from "react-icons/io";
-import { MdDelete, MdEdit } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
 const avatarDefault = "/images/user.png";
@@ -138,11 +138,6 @@ export default function Teachers() {
       title: "Hành động",
       render: (record) => (
         <Space>
-          <Tooltip title="Sửa">
-            <Button onClick={() => showEditModal(record)}>
-              <MdEdit />
-            </Button>
-          </Tooltip>
           <Popconfirm
             title="Xác nhận xóa giáo viên?"
             onConfirm={() => handleDelete(record.id)}
