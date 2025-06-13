@@ -25,7 +25,6 @@ import {
 import { useForm } from "antd/es/form/Form";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { IoMdAdd } from "react-icons/io";
 import { MdDelete } from "react-icons/md";
 import { RiDeleteBin2Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
@@ -315,13 +314,6 @@ export default function Users() {
   ];
   return (
     <div>
-      <Button
-        className="mt-5 w-[50px] h-[50px] flex items-center justify-center bg-[#1473e6] rounded-[50%]"
-        type="primary"
-        onClick={showCreateModal}
-      >
-        <IoMdAdd className="text-[#fff] text-[20px]" />
-      </Button>
       <h2 className="mt-7 text-[#242424] text-[20px] font-bold text-center">
         Danh sách người dùng
       </h2>
