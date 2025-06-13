@@ -26,7 +26,7 @@ import { useForm } from "antd/es/form/Form";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { IoMdAdd } from "react-icons/io";
-import { MdDelete, MdEdit } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
 import { RiDeleteBin2Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 const { resetValidateUser } = userSlices.actions;
@@ -295,11 +295,6 @@ export default function Users() {
       key: "action",
       render: (user, { id }) => (
         <Space size="middle">
-          <Tooltip placement="top" title="Chỉnh Sửa">
-            <Button onClick={() => showEditModal(user)}>
-              <MdEdit className="text-[20px]" />
-            </Button>
-          </Tooltip>
           <Popconfirm
             title="Bạn có chắc bạn muốn xóa mục này không?"
             onConfirm={() => {
